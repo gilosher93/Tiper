@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">טיפר</string>
+    <string name="title_activity_create_manual_shift">הוספה ידנית</string>
+    <string name="title_activity_recent_shifts">היסטוריית משמרות</string>
+    <string name="title_activity_settings">הגדרות</string>
+    <string name="sum_of_hours">שעות</string>
+    <string name="summary">סה״כ</string>
+    <string name="salary">שכר</string>
+    <string name="tips">טיפים</string>
+    <string name="end_shift_title">סיום משמרת</string>
+    <string name="end_shift_message">האם אתה בטוח שברצונך לסיים את המשמרת?</string>
+    <string name="add_manual_shift">הוסף משמרת</string>
+    <string-array name ="months">
+        <item>ינואר</item>
+        <item>פברואר</item>
+        <item>מרץ</item>
+        <item>אפריל</item>
+        <item>מאי</item>
+        <item>יוני</item>
+        <item>יולי</item>
+        <item>אוגוסט</item>
+        <item>ספטמבר</item>
+        <item>אוקטובר</item>
+        <item>נובמבר</item>
+        <item>דצמבר</item>
+    </string-array>
+    <string-array name="years">
+        <item>2015</item>
+        <item>2016</item>
+        <item>2017</item>
+        <item>2018</item>
+        <item>2019</item>
+        <item>2020</item>
+        <item>2021</item>
+        <item>2022</item>
+        <item>2023</item>
+        <item>2024</item>
+        <item>2025</item>
+    </string-array>
+</resources>

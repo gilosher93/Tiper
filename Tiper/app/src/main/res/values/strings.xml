@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Tiper</string>
+    <string name="title_activity_create_manual_shift">CreateManualShift</string>
+    <string name="title_activity_recent_shifts">Recent Shifts</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="sum_of_hours">Total Hours</string>
+    <string name="summary">Summary</string>
+    <string name="salary">Salary</string>
+    <string name="tips">Tips</string>
+    <string name="end_shift_title">End Shift</string>
+    <string name="end_shift_message">Are you sure you want to end the shift</string>
+    <string name="add_manual_shift">Add Manual</string>
+    <string-array name="months">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+    <string-array name="years">
+        <item>2015</item>
+        <item>2016</item>
+        <item>2017</item>
+        <item>2018</item>
+        <item>2019</item>
+        <item>2020</item>
+        <item>2021</item>
+        <item>2022</item>
+        <item>2023</item>
+        <item>2024</item>
+        <item>2025</item>
+    </string-array>
+
+</resources>
