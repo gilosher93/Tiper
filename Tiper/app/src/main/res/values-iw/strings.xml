@@ -11,6 +11,7 @@
     <string name="end_shift_title">סיום משמרת</string>
     <string name="end_shift_message">האם אתה בטוח שברצונך לסיים את המשמרת?</string>
     <string name="add_manual_shift">הוסף משמרת</string>
+    <string name="drag_here_tips">גרור טיפים לכאן</string>
     <string-array name ="months">
         <item>ינואר</item>
         <item>פברואר</item>

@@ -1,21 +1,19 @@
 package com.example.mysc.tiper;
 
-import android.app.DialogFragment;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.annotation.Nullable;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
 
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -68,17 +66,27 @@ public class CreateManualShift extends AppCompatActivity {
                 String month = String.valueOf(datePicker.getMonth()+1);
                 String year = String.valueOf(datePicker.getYear());
                 String tips = txtTips.getText().toString();
-                float salary = sharedPreferences.getFloat(SettingsActivity.SALARY_PER_HOURS,25);
+                float salary = sharedPreferences.getFloat(HomeActivity.SALARY, 25);
                 int manualTips = tips.length() == 0 ? 0 : Integer.valueOf(tips);
                 long startTime = Shift.getFullDateInLong(year + "-" + month + "-" + day + ", " + startHour + ":" + startMinutes);
                 long endTime = Shift.getFullDateInLong(year + "-" + month + "-" + day + ", " + endHour + ":" + endMinutes);
                 Shift shift = new Shift(startTime, endTime, salary, manualTips);
-                //TODO: SEND THE SHIFT!!!
+                writingToDb(shift);
+                setResult(RESULT_OK);
                 finish();
             }
         });
     }
-
+    void writingToDb(Shift shift){
+        try {
+            DBAdapter dbAdapter = new DBAdapter(this);
+            dbAdapter.open();
+            dbAdapter.insertShiftToDB(shift);
+            dbAdapter.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

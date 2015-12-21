@@ -10,6 +10,7 @@
     <string name="end_shift_title">End Shift</string>
     <string name="end_shift_message">Are you sure you want to end the shift</string>
     <string name="add_manual_shift">Add Manual</string>
+    <string name="drag_here_tips">Drag Here Tips</string>
     <string-array name="months">
         <item>January</item>
         <item>February</item>

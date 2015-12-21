@@ -32,12 +32,11 @@ public class HomeActivity extends AppCompatActivity {
 
     public static final String prefName = "prefName";
     public static final String START_TIME = "start_time";
-    public static final String SHIFT_SALARY = "SHIFT_SALARY";
     public static final String ALL_SHIFTS = "all_shifts";
     public static final String IS_START_WORKING = "is_start_working";
     public static final String DAILY_TIPS = "DAILY_TIPS";
-    public static final String DAILY_SALARY = "DAILY_SALARY";
-    public static final String DAILY_SUMMARY = "DAILY_SUMMARY";
+    public static final int REQUEST_CODE = 5;
+    public static final String SALARY = "SALARY";
     LinearLayout layoutTipsAndSalary;
     LinearLayout layoutSummary;
     LinearLayout target;
@@ -61,7 +60,6 @@ public class HomeActivity extends AppCompatActivity {
     int dailyTips = 0;
     int dailySalary = 0;
     int dailySummary = 0;
-    float salaryPerHour = 25;
     long startTime = 0;
     DBAdapter dbAdapter;
     ArrayList<Shift> allShifts;
@@ -122,7 +120,7 @@ public class HomeActivity extends AppCompatActivity {
                                             Shift shiftToAdd = new Shift(currentStartTime,endTime,salary,dailyTips);
                                             allShifts.add(shiftToAdd);
                                             writingToDb(shiftToAdd);
-                                            Toast.makeText(getBaseContext(), "נכנס למאגר", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(getBaseContext(), "משמרת נשמרה בהצלחה!ף", Toast.LENGTH_LONG).show();
                                             disconnectUser();
                                         }
                                     })
@@ -269,7 +267,7 @@ public class HomeActivity extends AppCompatActivity {
         txtHiddenText.setVisibility(View.INVISIBLE);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(startTime));
-        lblEnterTime.setText("שעת התחלה " + getHourString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
+        lblEnterTime.setText("שעת התחלה " + Shift.getHourString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
         lblEnterTime.setVisibility(View.VISIBLE);
         lblDailyTips.setText(dailyTips + "₪");
     }
@@ -329,15 +327,24 @@ public class HomeActivity extends AppCompatActivity {
         isStartWorking = sharedPreferences.getBoolean(IS_START_WORKING, false);
         startTime = sharedPreferences.getLong(START_TIME, 0);
         dailyTips = sharedPreferences.getInt(DAILY_TIPS, 0);
-        salary = sharedPreferences.getFloat(SettingsActivity.SALARY_PER_HOURS,25f);
+        salary = sharedPreferences.getFloat(SALARY, 25.0f);
     }
 
     public void writeToSharedPreferences(){
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(DAILY_TIPS,dailyTips);
         editor.putLong(START_TIME, startTime);
-        editor.putBoolean(IS_START_WORKING,isStartWorking);
+        editor.putBoolean(IS_START_WORKING, isStartWorking);
         editor.apply();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE){
+            if (resultCode == RESULT_OK){
+                Toast.makeText(getBaseContext(),"משמרת נוספה בהצלחה!",Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -362,7 +369,7 @@ public class HomeActivity extends AppCompatActivity {
                 break;
             case R.id.action_add_manual_shift:
                 Intent createManualShift = new Intent(this,CreateManualShift.class);
-                startActivity(createManualShift);
+                startActivityForResult(createManualShift, REQUEST_CODE);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -396,13 +403,5 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    public static String getHourString(int hours, int minutes){
-        String hour = String.valueOf(hours);
-        String minute = String.valueOf(minutes);
-        if(hours<10)
-            hour = "0" + hours;
-        if(minutes<10)
-            minute = "0" + minutes;
-        return hour + ":" + minute;
-    }
+
 }

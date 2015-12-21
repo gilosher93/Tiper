@@ -75,7 +75,7 @@ public class DBAdapter {
         contentValues.put(START_TIME, shift.startTime);
         contentValues.put(END_TIME, shift.endTime);
         contentValues.put(SUM_OF_HOURS, shift.getSumOfHoursString());
-        contentValues.put(SALARY, shift.getSalary());
+        contentValues.put(SALARY, shift.salaryPerHour);
         contentValues.put(TIPS, shift.getTipsCount());
         contentValues.put(SUMMARY, shift.getSummary());
         return db.insert(DATABASE_TABLE, null, contentValues);

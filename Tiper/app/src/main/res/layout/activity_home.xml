@@ -163,14 +163,22 @@
         </LinearLayout>
 
         <LinearLayout
-
             android:id="@+id/layoutTarget"
             android:orientation="vertical"
             android:layout_marginTop="30dp"
             android:layout_gravity="center"
             android:background="@drawable/shape_target_normal"
             android:layout_width="150dp"
-            android:layout_height="150dp"/>
+            android:layout_height="150dp">
+            <TextView
+                android:text="@string/drag_here_tips"
+                android:textStyle="bold"
+                android:textSize="17sp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_width="90dp"
+                android:layout_height="match_parent" />
+        </LinearLayout>
     </LinearLayout>
 
     <ImageButton

@@ -16,7 +16,7 @@ public class Shift implements Serializable {
     float salaryPerHour;
     int tipsCount;
 
-    public Shift(long startTime, long endTime, float salaryPerHour, int tipsCount){
+    public Shift(long startTime, long endTime, float salaryPerHour, int tipsCount) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.salaryPerHour = salaryPerHour;
@@ -55,45 +55,40 @@ public class Shift implements Serializable {
         this.endTime = endTime;
     }
 
-    public static int distanceMinutes(long startTime, long endTime){
-        String start = whatTimeIsIt(startTime);
-        String end = whatTimeIsIt(endTime);
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-        Date d1 = null,d2 = null;
-        try {
-            d1 = format.parse(start);
-            d2 = format.parse(end);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return (int)(((d2.getTime() - d1.getTime())/1000)/60); //distance of minutes;
+    public static int distanceMinutes(long startTime, long endTime) {
+        int distance = (int) (((endTime - startTime) / 1000) / 60);
+        if (distance < 0)
+            return distanceMinutes(startTime, endTime + 24 * 60 * 60 * 1000);
+        return distance;
     }
 
 
-    public static String whatTimeIsIt (Long time){
-        Date date = new Date(time);
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return dateFormat.format(date);
+    public float getSalary() {
+        return getSumOfHours() * salaryPerHour;
     }
 
-    public float getSalary(){
-        return getSumOfHours() * salaryPerHour ;
-    }
-
-    public float getSumOfHours(){
+    public float getSumOfHours() {
         int distance = distanceMinutes(startTime, endTime);
         int numberOfHours = distance / 60;
         int numberOfMinutes = distance % 60;
-        return (float)numberOfMinutes / 60 + numberOfHours;
+        return (float) numberOfMinutes / 60 + numberOfHours;
     }
 
-    public String getSumOfHoursString(){
+    public String getSumOfHoursString() {
         int distance = distanceMinutes(startTime, endTime);
         int numberOfHours = distance / 60;
         int numberOfMinutes = distance % 60;
-        return HomeActivity.getHourString(numberOfHours,numberOfMinutes);
+        return getHourString(numberOfHours, numberOfMinutes);
+    }
+
+    public static String getHourString(int hours, int minutes) {
+        String hour = String.valueOf(hours);
+        String minute = String.valueOf(minutes);
+        if (hours < 10)
+            hour = "0" + hours;
+        if (minutes < 10)
+            minute = "0" + minutes;
+        return hour + ":" + minute;
     }
 
     public static long getFullDateInLong(String dateInString) {
@@ -101,13 +96,21 @@ public class Shift implements Serializable {
         Date d = null;
         try {
             d = df.parse(dateInString);
-        }catch (ParseException e){
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return d.getTime();
     }
 
-    public float getSummary(){
+    public float getSummary() {
         return getSalary() + tipsCount;
+    }
+
+    public static String whatTimeIsIt(Long time) {
+        Date date = new Date(time);
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return dateFormat.format(date);
     }
 }

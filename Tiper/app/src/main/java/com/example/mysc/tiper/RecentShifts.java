@@ -9,7 +9,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -26,6 +29,12 @@ public class RecentShifts extends AppCompatActivity {
     int selectedMonth;
     int selectedYear;
     Calendar calendar;
+    TextView txtTotalSummary;
+    TextView txtTotalSalary;
+    TextView txtTotalTips;
+    int totalTips = 0;
+    float totalSalary = 0;
+    float totalSummary = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +46,9 @@ public class RecentShifts extends AppCompatActivity {
         currentShifts = new ArrayList<Shift>();
         spnYear = (Spinner) findViewById(R.id.spnYear);
         spnMonth = (Spinner) findViewById(R.id.spnMonth);
+        txtTotalSummary = (TextView) findViewById(R.id.txtTotalSummary);
+        txtTotalSalary = (TextView) findViewById(R.id.txtTotalSalary);
+        txtTotalTips = (TextView) findViewById(R.id.txtTotalTips);
 
         Date date = new Date(System.currentTimeMillis());
         calendar = Calendar.getInstance();
@@ -46,13 +58,21 @@ public class RecentShifts extends AppCompatActivity {
 
         spnMonth.setSelection(selectedMonth);
         spnYear.setSelection(selectedYear-2015);
+        Shift shift;
         for (int i = 0; i < allShifts.size(); i++) {
-            calendar.setTime(new Date(allShifts.get(i).startTime));
+            shift = allShifts.get(i);
+            calendar.setTime(new Date(shift.startTime));
             if (calendar.get(Calendar.MONTH) == selectedMonth && calendar.get(Calendar.YEAR) == selectedYear) {
-                currentShifts.add(allShifts.get(i));
+                currentShifts.add(shift);
+                totalTips += shift.getTipsCount();
+                totalSalary += shift.getSalary();
             }
         }
-
+        totalSummary = totalTips + totalSalary;
+        NumberFormat formatter = new DecimalFormat("#.##");
+        txtTotalSummary.setText(getResources().getString(R.string.summary) + ": " + formatter.format(totalSummary));
+        txtTotalSalary.setText(getResources().getString(R.string.salary) + ": " + formatter.format(totalSalary));
+        txtTotalTips.setText(getResources().getString(R.string.tips) + ": " + totalTips);
         lstShifts = (ListView) findViewById(R.id.lstShifts);
         shiftAdapter = new ShiftAdapter(this, currentShifts);
         lstShifts.setAdapter(shiftAdapter);
@@ -85,14 +105,24 @@ public class RecentShifts extends AppCompatActivity {
 
     private void notifyChanges() {
         currentShifts.clear();
+        totalSalary = 0;
+        totalTips = 0;
         Shift shift;
         for (int i = 0; i < allShifts.size(); i++) {
             shift = allShifts.get(i);
             calendar.setTime(new Date(shift.startTime));
             if (calendar.get(Calendar.MONTH) == selectedMonth && calendar.get(Calendar.YEAR) == selectedYear) {
                 currentShifts.add(shift);
+                totalTips += shift.getTipsCount();
+                totalSalary += shift.getSalary();
             }
+
         }
+        totalSummary = totalTips + totalSalary;
+        NumberFormat formatter = new DecimalFormat("#.##");
+        txtTotalSummary.setText(getResources().getString(R.string.summary) + ": " + formatter.format(totalSummary));
+        txtTotalSalary.setText(getResources().getString(R.string.salary) + ": " + formatter.format(totalSalary));
+        txtTotalTips.setText(getResources().getString(R.string.tips) + ": " + totalTips);
         shiftAdapter.notifyDataSetChanged();
     }
 

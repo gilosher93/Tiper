@@ -15,7 +15,7 @@ import java.text.NumberFormat;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    public static final String SALARY_PER_HOURS = "SALARY_PER_HOURS";
+
     SharedPreferences sharedPreferences;
     EditText txtSalaryPerHour;
     Button btnSaveSettings;
@@ -50,12 +50,12 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void readSharePreferences() {
-        salaryPerHours = sharedPreferences.getFloat(SALARY_PER_HOURS,25);
+        salaryPerHours = sharedPreferences.getFloat(HomeActivity.SALARY,25.0f);
     }
 
     public void writeToSharedPreferences(){
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putFloat(SALARY_PER_HOURS, salaryPerHours);
+        editor.putFloat(HomeActivity.SALARY, salaryPerHours);
         editor.apply();
     }
 
