@@ -24,6 +24,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -58,8 +60,8 @@ public class HomeActivity extends AppCompatActivity {
     Button btnDecrease;
     float salary;
     int dailyTips = 0;
-    int dailySalary = 0;
-    int dailySummary = 0;
+    float dailySalary = 0;
+    float dailySummary = 0;
     long startTime = 0;
     DBAdapter dbAdapter;
     ArrayList<Shift> allShifts;
@@ -140,14 +142,14 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dailyTips++;
-                lblDailyTips.setText(String.valueOf(dailyTips) + "₪");
+                calcAndPresentDailys();
             }
         });
         btnDecrease.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 dailyTips = 0;
-                lblDailyTips.setText(String.valueOf(dailyTips) + "₪");
+                calcAndPresentDailys();
                 return true;
             }
         });
@@ -156,7 +158,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (dailyTips > 0) {
                     dailyTips--;
-                    lblDailyTips.setText(String.valueOf(dailyTips) + "₪");
+                    calcAndPresentDailys();
                 }
             }
         });
@@ -175,7 +177,7 @@ public class HomeActivity extends AppCompatActivity {
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_normal));
                     //target.setAlpha(1f);
                     dailyTips += moneyToAdd;
-                    lblDailyTips.setText(dailyTips + "₪");
+                    calcAndPresentDailys();
                 }
                 return true;
             }
@@ -269,7 +271,9 @@ public class HomeActivity extends AppCompatActivity {
         calendar.setTime(new Date(startTime));
         lblEnterTime.setText("שעת התחלה " + Shift.getHourString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
         lblEnterTime.setVisibility(View.VISIBLE);
-        lblDailyTips.setText(dailyTips + "₪");
+
+        // setup and present the fields
+        calcAndPresentDailys();
     }
 
     private void disconnectUser() {
@@ -301,6 +305,19 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    public void calcAndPresentDailys(){
+        int distance = Shift.distanceMinutes(startTime,System.currentTimeMillis());
+        int numberOfHours = distance / 60;
+        int numberOfMinutes = distance % 60;
+        float sumOfHours = (float) numberOfMinutes / 60 + numberOfHours;
+        dailySalary = sumOfHours * sharedPreferences.getFloat(SALARY,25.0f);
+        dailySummary = dailyTips + dailySalary;
+        NumberFormat formatter = new DecimalFormat("#.##");
+        lblDailyTips.setText(dailyTips + "₪");
+        lblDailySalary.setText(formatter.format(dailySalary) + "₪");
+        lblDailySummary.setText(formatter.format(dailySummary) + "₪");
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -308,11 +325,8 @@ public class HomeActivity extends AppCompatActivity {
         readFromDb();
         if (isStartWorking && startTime != 0){
             connectUser();
-        }else{
+        }else {
             disconnectUser();
-        }
-        if(dailyTips != 0){
-            lblDailyTips.setText(dailyTips + "₪");
         }
 
     }
