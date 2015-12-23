@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -39,7 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String salary = txtSalaryPerHour.getText().toString();
                 if(!checkNumberString(salary)){
-                    Toast.makeText(getBaseContext(), "אנא וודא שמילאת רק ספרות או נקודה", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), getString(R.string.vaild_input_number_notice), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 salaryPerHours = salary.length() == 0 ? 0 : Float.valueOf(salary);

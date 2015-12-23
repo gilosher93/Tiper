@@ -38,7 +38,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:gravity="right"
-                    android:text="שכר לשעה"
+                    android:text="@string/salary_per_hour"
                     android:textColor="#ffffff"
                     android:textSize="22sp" />
             </LinearLayout>
@@ -55,7 +55,7 @@
         android:background="#FFC107"
         android:paddingEnd="0dp"
         android:paddingStart="0dp"
-        android:text="שמור שינויים"
+        android:text="@string/save_changes"
         android:textSize="20sp"
         android:textStyle="bold" />
 

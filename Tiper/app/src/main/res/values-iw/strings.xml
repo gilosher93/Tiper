@@ -8,10 +8,27 @@
     <string name="summary">סה״כ</string>
     <string name="salary">שכר</string>
     <string name="tips">טיפים</string>
+    <string name="date">תאריך</string>
     <string name="end_shift_title">סיום משמרת</string>
     <string name="end_shift_message">האם אתה בטוח שברצונך לסיים את המשמרת?</string>
     <string name="add_manual_shift">הוסף משמרת</string>
     <string name="drag_here_tips">גרור טיפים לכאן</string>
+    <string name="delete_shift_title">מחיקת משמרת</string>
+    <string name="delete_shift_query">האם אתה בטוח שברצונך למחוק את</string>
+    <string name="enter_time">שעת כניסה</string>
+    <string name="exit_time">שעת יציאה</string>
+    <string name="ok">אישור</string>
+    <string name="cancel">ביטול</string>
+    <string name="button_start_shift">לחץ על ״התחל עבודה״ בכדי להתחיל את המשמרת</string>
+    <string name="start_shift">התחל עבודה</string>
+    <string name="today_salary">משכורת היום</string>
+    <string name="today_tips">טיפים היום</string>
+    <string name="today_summary">סה״כ היום</string>
+    <string name="shift_saved_successfully">משמרת נשמרה בהצלחה!</string>
+    <string name="end_shift">סיים עבודה</string>
+    <string name="vaild_input_number_notice">אנא וודא שמילאת רק ספרות או נקודה</string>
+    <string name="salary_per_hour">שכר לשעה</string>
+    <string name="save_changes">שמור שינויים</string>
     <string-array name ="months">
         <item>ינואר</item>
         <item>פברואר</item>

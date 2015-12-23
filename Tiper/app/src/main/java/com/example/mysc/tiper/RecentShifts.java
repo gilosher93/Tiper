@@ -1,8 +1,13 @@
 package com.example.mysc.tiper;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,9 +15,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,6 +36,7 @@ public class RecentShifts extends AppCompatActivity {
     ShiftAdapter shiftAdapter;
     int selectedMonth;
     int selectedYear;
+    DBAdapter dbAdapter;
     Calendar calendar;
     TextView txtTotalSummary;
     TextView txtTotalSalary;
@@ -42,6 +51,7 @@ public class RecentShifts extends AppCompatActivity {
         setContentView(R.layout.activity_recent_shifts);
 
         intent = getIntent();
+        dbAdapter = new DBAdapter(this);
         allShifts = (ArrayList<Shift>) intent.getSerializableExtra(HomeActivity.ALL_SHIFTS);
         currentShifts = new ArrayList<Shift>();
         spnYear = (Spinner) findViewById(R.id.spnYear);
@@ -101,9 +111,78 @@ public class RecentShifts extends AppCompatActivity {
 
             }
         });
+        lstShifts.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM");
+                AlertDialog.Builder builder = new AlertDialog.Builder(RecentShifts.this)
+                        .setTitle(getString(R.string.delete_shift_title))
+                        .setMessage(getString(R.string.delete_shift_query)+" "+simpleDateFormat.format(new Date(currentShifts.get(position).startTime)) + " ?")
+                        .setCancelable(true)
+                        .setPositiveButton(android.R.string.yes,
+                                new Dialog.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int k) {
+                                        removeShift(position);
+                                        notifyChanges();
+                                        Toast.makeText(getBaseContext(), "משמרת נמחקה בהצלחה!", Toast.LENGTH_LONG).show();
+                                    }
+                                })
+                        .setNegativeButton(android.R.string.no,
+                                new Dialog.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                });
+                builder.create().show();
+                return true;
+            }
+        });
+    }
+    void writingToDb(ArrayList<Shift> shifts) {
+        try {
+            dbAdapter.open();
+            for (int i = 0; i < shifts.size(); i++) {
+                dbAdapter.insertShiftToDB(shifts.get(i));
+            }
+            dbAdapter.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    void printAllDB(){
+        try {
+            dbAdapter.open();
+            Cursor cursor = dbAdapter.getAllShifts();
+            while(cursor.moveToNext()){
+                int id = cursor.getInt(0);
+                long startTime = cursor.getLong(1);
+                long endTime = cursor.getLong(2);
+                float salary = cursor.getFloat(4);
+                int tips = cursor.getInt(5);
+                Shift shift = new Shift(startTime, endTime, salary, tips,id);
+                Log.d("Gil",shift.toString());
+            }
+            dbAdapter.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean removeShift(int position) {
+        for (int i = 0; i < allShifts.size(); i++) {
+            if(currentShifts.get(position).getId() == allShifts.get(i).getId()){
+                allShifts.remove(i);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void notifyChanges() {
+        clearDb();
+        writingToDb(allShifts);
         currentShifts.clear();
         totalSalary = 0;
         totalTips = 0;
@@ -124,6 +203,16 @@ public class RecentShifts extends AppCompatActivity {
         txtTotalSalary.setText(getResources().getString(R.string.salary) + ": " + formatter.format(totalSalary));
         txtTotalTips.setText(getResources().getString(R.string.tips) + ": " + totalTips);
         shiftAdapter.notifyDataSetChanged();
+    }
+
+    public void clearDb(){
+        try {
+            dbAdapter.open();
+            dbAdapter.clearDB();
+            dbAdapter.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

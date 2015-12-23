@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.TransitionManager;
@@ -66,6 +67,7 @@ public class HomeActivity extends AppCompatActivity {
     DBAdapter dbAdapter;
     ArrayList<Shift> allShifts;
     boolean isStartWorking = false;
+    //MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +81,6 @@ public class HomeActivity extends AppCompatActivity {
         target = (LinearLayout) findViewById(R.id.layoutTarget);
         startWorkingLayout = (ViewGroup) findViewById(R.id.startWorkingLayout);
         sharedPreferences = getSharedPreferences(prefName, MODE_PRIVATE);
-
         btnShekel1 = (ImageButton) findViewById(R.id.btnShekel1);
         btnShekel2 = (ImageButton) findViewById(R.id.btnShekel2);
         btnShekel5 = (ImageButton) findViewById(R.id.btnShekel5);
@@ -101,28 +102,28 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TransitionManager.beginDelayedTransition(startWorkingLayout);
                 if (!isStartWorking) {
-                    dailyTips = sharedPreferences.getInt(DAILY_TIPS,0);
+                    dailyTips = sharedPreferences.getInt(DAILY_TIPS, 0);
                     startTime = System.currentTimeMillis();
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putLong(START_TIME, startTime);
                     editor.putBoolean(IS_START_WORKING, isStartWorking);
                     editor.apply();
                     connectUser();
-                }else{
+                } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this)
                             .setTitle(getString(R.string.end_shift_title))
                             .setMessage(getString(R.string.end_shift_message))
-                            .setCancelable(false)
+                            .setCancelable(true)
                             .setPositiveButton(android.R.string.yes,
                                     new Dialog.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int i) {
-                                            long currentStartTime = sharedPreferences.getLong(START_TIME,0);
+                                            long currentStartTime = sharedPreferences.getLong(START_TIME, 0);
                                             long endTime = System.currentTimeMillis();
-                                            Shift shiftToAdd = new Shift(currentStartTime,endTime,salary,dailyTips);
+                                            Shift shiftToAdd = new Shift(currentStartTime, endTime, salary, dailyTips, allShifts.size() + 1);
                                             allShifts.add(shiftToAdd);
                                             writingToDb(shiftToAdd);
-                                            Toast.makeText(getBaseContext(), "משמרת נשמרה בהצלחה!ף", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(getBaseContext(), getString(R.string.shift_saved_successfully), Toast.LENGTH_LONG).show();
                                             disconnectUser();
                                         }
                                     })
@@ -169,10 +170,10 @@ public class HomeActivity extends AppCompatActivity {
                 final boolean result = event.getResult();
                 if (!result && action != DragEvent.ACTION_DRAG_STARTED)
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_pressed));
-                    //target.setAlpha(0.5f);
+                //target.setAlpha(0.5f);
                 if (!result && action == DragEvent.ACTION_DRAG_EXITED || action == DragEvent.ACTION_DRAG_ENDED)
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_normal));
-                    //target.setAlpha(1f);
+                //target.setAlpha(1f);
                 if (result && action == DragEvent.ACTION_DRAG_ENDED) {
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_normal));
                     //target.setAlpha(1f);
@@ -252,7 +253,7 @@ public class HomeActivity extends AppCompatActivity {
     private void connectUser() {
         //set the button position and text
         isStartWorking = true;
-        btnStartWorking.setText("סיים עבודה");
+        btnStartWorking.setText(getString(R.string.end_shift));
         RelativeLayout.LayoutParams position = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         position.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         btnStartWorking.setLayoutParams(position);
@@ -269,7 +270,7 @@ public class HomeActivity extends AppCompatActivity {
         txtHiddenText.setVisibility(View.INVISIBLE);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(startTime));
-        lblEnterTime.setText("שעת התחלה " + Shift.getHourString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
+        lblEnterTime.setText(getString(R.string.enter_time)+" "+ Shift.getHourString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
         lblEnterTime.setVisibility(View.VISIBLE);
 
         // setup and present the fields
@@ -279,7 +280,7 @@ public class HomeActivity extends AppCompatActivity {
     private void disconnectUser() {
         //set the button position and text
         isStartWorking = false;
-        btnStartWorking.setText("התחל עבודה");
+        btnStartWorking.setText(getString(R.string.start_shift));
         RelativeLayout.LayoutParams position = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         position.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
         btnStartWorking.setLayoutParams(position);
@@ -305,12 +306,12 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
-    public void calcAndPresentDailys(){
-        int distance = Shift.distanceMinutes(startTime,System.currentTimeMillis());
+    public void calcAndPresentDailys() {
+        int distance = Shift.distanceMinutes(startTime, System.currentTimeMillis());
         int numberOfHours = distance / 60;
         int numberOfMinutes = distance % 60;
         float sumOfHours = (float) numberOfMinutes / 60 + numberOfHours;
-        dailySalary = sumOfHours * sharedPreferences.getFloat(SALARY,25.0f);
+        dailySalary = sumOfHours * sharedPreferences.getFloat(SALARY, 25.0f);
         dailySummary = dailyTips + dailySalary;
         NumberFormat formatter = new DecimalFormat("#.##");
         lblDailyTips.setText(dailyTips + "₪");
@@ -323,9 +324,9 @@ public class HomeActivity extends AppCompatActivity {
         super.onStart();
         readFromSharedPreferences();
         readFromDb();
-        if (isStartWorking && startTime != 0){
+        if (isStartWorking && startTime != 0) {
             connectUser();
-        }else {
+        } else {
             disconnectUser();
         }
 
@@ -337,16 +338,16 @@ public class HomeActivity extends AppCompatActivity {
         writeToSharedPreferences();
     }
 
-    public void readFromSharedPreferences(){
+    public void readFromSharedPreferences() {
         isStartWorking = sharedPreferences.getBoolean(IS_START_WORKING, false);
         startTime = sharedPreferences.getLong(START_TIME, 0);
         dailyTips = sharedPreferences.getInt(DAILY_TIPS, 0);
         salary = sharedPreferences.getFloat(SALARY, 25.0f);
     }
 
-    public void writeToSharedPreferences(){
+    public void writeToSharedPreferences() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(DAILY_TIPS,dailyTips);
+        editor.putInt(DAILY_TIPS, dailyTips);
         editor.putLong(START_TIME, startTime);
         editor.putBoolean(IS_START_WORKING, isStartWorking);
         editor.apply();
@@ -354,9 +355,9 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE){
-            if (resultCode == RESULT_OK){
-                Toast.makeText(getBaseContext(),"משמרת נוספה בהצלחה!",Toast.LENGTH_LONG).show();
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(getBaseContext(),getString(R.string.shift_saved_successfully), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -370,26 +371,26 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_settings:
-                Intent settingsActivity = new Intent(this,SettingsActivity.class);
+                Intent settingsActivity = new Intent(this, SettingsActivity.class);
                 startActivity(settingsActivity);
                 break;
 
             case R.id.action_table:
-                Intent recentShifts = new Intent(this,RecentShifts.class);
+                Intent recentShifts = new Intent(this, RecentShifts.class);
                 recentShifts.putExtra(ALL_SHIFTS, allShifts);
                 startActivity(recentShifts);
                 break;
             case R.id.action_add_manual_shift:
-                Intent createManualShift = new Intent(this,CreateManualShift.class);
+                Intent createManualShift = new Intent(this, CreateManualShift.class);
                 startActivityForResult(createManualShift, REQUEST_CODE);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    void writingToDb(Shift shift){
+    void writingToDb(Shift shift) {
         try {
             dbAdapter.open();
             dbAdapter.insertShiftToDB(shift);
@@ -399,17 +400,18 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    void readFromDb(){
+    void readFromDb() {
         try {
             dbAdapter.open();
             Cursor cursor = dbAdapter.getAllShifts();
             allShifts.clear();
-            while(cursor.moveToNext()){
-                long startTime = cursor.getLong(0);
-                long endTime = cursor.getLong(1);
-                float salary = cursor.getFloat(3);
-                int tips = cursor.getInt(4);
-                allShifts.add(new Shift(startTime,endTime,salary,tips));
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(0);
+                long startTime = cursor.getLong(1);
+                long endTime = cursor.getLong(2);
+                float salary = cursor.getFloat(4);
+                int tips = cursor.getInt(5);
+                allShifts.add(new Shift(startTime, endTime, salary, tips, id));
             }
             dbAdapter.close();
         } catch (SQLException e) {

@@ -1,8 +1,7 @@
 package com.example.mysc.tiper;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-
+import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -12,7 +11,6 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
-
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,12 +25,13 @@ public class CreateManualShift extends AppCompatActivity {
     Button btnOk;
     Button btnCancel;
     SharedPreferences sharedPreferences;
+    DBAdapter dbAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_manual_shift);
-
+        dbAdapter = new DBAdapter(this);
         sharedPreferences = getSharedPreferences(HomeActivity.prefName, MODE_PRIVATE);
         startPicker = (TimePicker) findViewById(R.id.startPicker);
         endPicker = (TimePicker) findViewById(R.id.endPicker);
@@ -40,10 +39,10 @@ public class CreateManualShift extends AppCompatActivity {
         btnOk = (Button) findViewById(R.id.btnOk);
         btnCancel = (Button) findViewById(R.id.btnCancel);
         txtTips = (EditText) findViewById(R.id.txtManualTips);
-
+        endPicker.setIs24HourView(true);
+        startPicker.setIs24HourView(true);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(System.currentTimeMillis()));
-
         startPicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
         startPicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
         endPicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
@@ -70,7 +69,7 @@ public class CreateManualShift extends AppCompatActivity {
                 int manualTips = tips.length() == 0 ? 0 : Integer.valueOf(tips);
                 long startTime = Shift.getFullDateInLong(year + "-" + month + "-" + day + ", " + startHour + ":" + startMinutes);
                 long endTime = Shift.getFullDateInLong(year + "-" + month + "-" + day + ", " + endHour + ":" + endMinutes);
-                Shift shift = new Shift(startTime, endTime, salary, manualTips);
+                Shift shift = new Shift(startTime, endTime, salary, manualTips,getShiftCountFromDb()+1);
                 writingToDb(shift);
                 setResult(RESULT_OK);
                 finish();
@@ -79,13 +78,27 @@ public class CreateManualShift extends AppCompatActivity {
     }
     void writingToDb(Shift shift){
         try {
-            DBAdapter dbAdapter = new DBAdapter(this);
+            dbAdapter = new DBAdapter(this);
             dbAdapter.open();
             dbAdapter.insertShiftToDB(shift);
             dbAdapter.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+    public int getShiftCountFromDb() {
+        int count = 0;
+        try {
+            dbAdapter.open();
+            Cursor cursor = dbAdapter.getAllShifts();
+            while (cursor.moveToNext()) {
+                count++;
+            }
+            dbAdapter.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

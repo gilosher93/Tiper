@@ -39,7 +39,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:text="שעת יציאה"
+                            android:text="@string/exit_time"
                             android:textColor="#fff"
                             android:textSize="17sp"
                             android:textStyle="bold" />
@@ -66,7 +66,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:text="שעת כניסה"
+                            android:text="@string/enter_time"
                             android:textColor="#fff"
                             android:textSize="17sp"
                             android:textStyle="bold" />
@@ -90,7 +90,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="תאריך"
+                        android:text="@string/date"
                         android:textColor="#fff"
                         android:textSize="17sp"
                         android:textStyle="bold" />
@@ -113,7 +113,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="טיפים"
+                        android:text="@string/tips"
                         android:textColor="#fff"
                         android:textSize="17sp"
                         android:textStyle="bold" />
@@ -144,7 +144,7 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:background="#FFC107"
-            android:text="אישור"
+            android:text="@string/ok"
             android:textColor="#000"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -160,7 +160,7 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:background="#FFC107"
-            android:text="ביטול"
+            android:text="@string/cancel"
             android:textColor="#000"
             android:textSize="20sp"
             android:textStyle="bold" />

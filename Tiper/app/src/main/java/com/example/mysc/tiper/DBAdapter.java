@@ -22,6 +22,7 @@ public class DBAdapter {
     public static final String SALARY = "salary";
     public static final String TIPS = "tips";
     public static final String SUMMARY = "summary";
+    public static final String SHIFT_ID = "shift_id";
 
     final Context context;
     private SQLiteDatabase db;
@@ -45,6 +46,7 @@ public class DBAdapter {
         @Override
         public void onCreate(SQLiteDatabase db) {
             String createTable = "CREATE TABLE " + DATABASE_TABLE + "(" +
+                    SHIFT_ID + " INTEGER," +
                     START_TIME + " INTEGER," +
                     END_TIME + " INTEGER," +
                     SUM_OF_HOURS + " REAL," +
@@ -72,6 +74,7 @@ public class DBAdapter {
 
     public long insertShiftToDB(Shift shift) {
         ContentValues contentValues = new ContentValues();
+        contentValues.put(SHIFT_ID, shift.getId());
         contentValues.put(START_TIME, shift.startTime);
         contentValues.put(END_TIME, shift.endTime);
         contentValues.put(SUM_OF_HOURS, shift.getSumOfHoursString());
@@ -81,8 +84,12 @@ public class DBAdapter {
         return db.insert(DATABASE_TABLE, null, contentValues);
     }
 
+    public int clearDB(){
+        return db.delete(DATABASE_TABLE, null, null);
+    }
+
     public Cursor getAllShifts() {
-        return db.query(DATABASE_TABLE, new String[]{START_TIME, END_TIME, SUM_OF_HOURS, SALARY, TIPS, SUMMARY}, null,
+        return db.query(DATABASE_TABLE, new String[]{SHIFT_ID, START_TIME, END_TIME, SUM_OF_HOURS, SALARY, TIPS, SUMMARY}, null,
                 null, null, null, null);
     }
 

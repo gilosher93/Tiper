@@ -11,16 +11,26 @@ import java.util.Date;
  * Created by Mysc on 21.12.2015.
  */
 public class Shift implements Serializable {
+    int id;
     long startTime;
     long endTime;
     float salaryPerHour;
     int tipsCount;
 
-    public Shift(long startTime, long endTime, float salaryPerHour, int tipsCount) {
+    public Shift(long startTime, long endTime, float salaryPerHour, int tipsCount, int id) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.salaryPerHour = salaryPerHour;
         this.tipsCount = tipsCount;
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public float getSalaryPerHour() {
@@ -112,5 +122,10 @@ public class Shift implements Serializable {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return dateFormat.format(date);
+    }
+
+    @Override
+    public String toString() {
+        return whatTimeIsIt(startTime) + "-" + whatTimeIsIt(endTime) + ", tips = " + tipsCount + ", salaryPerHour = " + salaryPerHour;
     }
 }
