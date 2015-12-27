@@ -15,6 +15,7 @@
         android:layout_height="fill_parent">
         <TextView
             android:visibility="invisible"
+            android:textColor="#0000FF"
             android:id="@+id/txtHiddenText"
             android:layout_centerHorizontal="true"
             android:text="@string/button_start_shift"

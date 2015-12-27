@@ -28,6 +28,9 @@
     <string name="vaild_input_number_notice">Please enter correct numbers</string>
     <string name="salary_per_hour">Salary per hour</string>
     <string name="save_changes">save changes</string>
+    <string name="sounds">Sounds</string>
+    <string name="skip">skip</string>
+    <string name="first_setup">Initial setup</string>
     <string-array name="months">
         <item>January</item>
         <item>February</item>

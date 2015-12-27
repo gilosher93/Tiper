@@ -4,5 +4,7 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorAccent">#283593</item>
     </style>
-
+    <style name="SwitchTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorAccent">#FFC107</item>
+    </style>
 </resources>

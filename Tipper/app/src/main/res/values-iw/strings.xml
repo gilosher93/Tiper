@@ -29,6 +29,9 @@
     <string name="vaild_input_number_notice">אנא וודא שמילאת רק ספרות או נקודה</string>
     <string name="salary_per_hour">שכר לשעה</string>
     <string name="save_changes">שמור שינויים</string>
+    <string name="sounds">צלילים באפליקציה</string>
+    <string name="skip">דלג</string>
+    <string name="first_setup">הגדרה ראשונית</string>
     <string-array name ="months">
         <item>ינואר</item>
         <item>פברואר</item>

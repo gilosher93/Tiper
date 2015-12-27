@@ -3,12 +3,15 @@ package co.il.tipper.mysc.tipper;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.TransitionManager;
 import android.view.DragEvent;
@@ -33,6 +36,7 @@ import java.util.Date;
 
 public class HomeActivity extends AppCompatActivity {
 
+    public static final String SOUNDS = "SOUNDS";
     public static final String prefName = "prefName";
     public static final String START_TIME = "start_time";
     public static final String ALL_SHIFTS = "all_shifts";
@@ -40,6 +44,7 @@ public class HomeActivity extends AppCompatActivity {
     public static final String DAILY_TIPS = "DAILY_TIPS";
     public static final int REQUEST_CODE = 5;
     public static final String SALARY = "SALARY";
+    public static final String FIRST_TIME = "FIRST_TIME";
     LinearLayout layoutTipsAndSalary;
     LinearLayout layoutSummary;
     LinearLayout target;
@@ -67,13 +72,16 @@ public class HomeActivity extends AppCompatActivity {
     DBAdapter dbAdapter;
     ArrayList<Shift> allShifts;
     boolean isStartWorking = false;
-    //MediaPlayer mp;
+    boolean sounds = false;
+    boolean showSetSalaryFragment = true;
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        mp = MediaPlayer.create(getBaseContext(), R.raw.coins_sound);
         dbAdapter = new DBAdapter(this);
         allShifts = new ArrayList<Shift>();
         layoutTipsAndSalary = (LinearLayout) findViewById(R.id.layoutTipsAndSalary);
@@ -170,15 +178,26 @@ public class HomeActivity extends AppCompatActivity {
                 final boolean result = event.getResult();
                 if (!result && action != DragEvent.ACTION_DRAG_STARTED)
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_pressed));
-                //target.setAlpha(0.5f);
                 if (!result && action == DragEvent.ACTION_DRAG_EXITED || action == DragEvent.ACTION_DRAG_ENDED)
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_normal));
-                //target.setAlpha(1f);
                 if (result && action == DragEvent.ACTION_DRAG_ENDED) {
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_normal));
-                    //target.setAlpha(1f);
                     dailyTips += moneyToAdd;
                     calcAndPresentDailys();
+                    if(sounds) {
+                        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                        switch (audio.getRingerMode()) {
+                            case AudioManager.RINGER_MODE_NORMAL:
+                                if (mp.isPlaying())
+                                    mp.seekTo(0);
+                                mp.start();
+                                break;
+                            case AudioManager.RINGER_MODE_VIBRATE:
+                                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                                vibrator.vibrate(400);
+                                break;
+                        }
+                    }
                 }
                 return true;
             }
@@ -249,6 +268,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void connectUser() {
         //set the button position and text
@@ -323,6 +343,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         readFromSharedPreferences();
+        checkForShowSetSalary();
         readFromDb();
         if (isStartWorking && startTime != 0) {
             connectUser();
@@ -330,6 +351,27 @@ public class HomeActivity extends AppCompatActivity {
             disconnectUser();
         }
 
+    }
+
+    private void checkForShowSetSalary() {
+        showSetSalaryFragment = sharedPreferences.getBoolean(FIRST_TIME, true);
+        if(showSetSalaryFragment){
+            SetSalaryFragment setSalaryFragment = new SetSalaryFragment();
+            setSalaryFragment.setFragment(new SetSalaryFragment.OnSetSalaryListener() {
+                @Override
+                public void onFinish(float chosenSalary) {
+                    salary = chosenSalary;
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putFloat(SALARY, salary);
+                    editor.apply();
+                }
+            });
+            setSalaryFragment.show(getFragmentManager(), "set salary");
+            showSetSalaryFragment = false;
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(FIRST_TIME, showSetSalaryFragment);
+            editor.apply();
+        }
     }
 
     @Override
@@ -343,6 +385,7 @@ public class HomeActivity extends AppCompatActivity {
         startTime = sharedPreferences.getLong(START_TIME, 0);
         dailyTips = sharedPreferences.getInt(DAILY_TIPS, 0);
         salary = sharedPreferences.getFloat(SALARY, 25.0f);
+        sounds = sharedPreferences.getBoolean(SOUNDS, false);
     }
 
     public void writeToSharedPreferences() {
@@ -350,6 +393,7 @@ public class HomeActivity extends AppCompatActivity {
         editor.putInt(DAILY_TIPS, dailyTips);
         editor.putLong(START_TIME, startTime);
         editor.putBoolean(IS_START_WORKING, isStartWorking);
+        editor.putBoolean(SOUNDS, sounds);
         editor.apply();
     }
 

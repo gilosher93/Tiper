@@ -1,36 +1,43 @@
 package co.il.tipper.mysc.tipper;
 
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.Toast;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 public class SettingsActivity extends AppCompatActivity {
 
-
     SharedPreferences sharedPreferences;
     EditText txtSalaryPerHour;
     Button btnSaveSettings;
+    Switch switchSounds;
     float salaryPerHours;
+    boolean sounds = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        switchSounds = (Switch) findViewById(R.id.switchSound);
         txtSalaryPerHour = (EditText) findViewById(R.id.txtSalaryPerHour);
         sharedPreferences = getSharedPreferences(HomeActivity.prefName,MODE_PRIVATE);
 
         readSharePreferences();
         NumberFormat formatter = new DecimalFormat("#.#");
         txtSalaryPerHour.setText(formatter.format(salaryPerHours));
+        switchSounds.setChecked(sounds);
 
         btnSaveSettings = (Button) findViewById(R.id.btnSaveSettings);
         btnSaveSettings.setOnClickListener(new View.OnClickListener() {
@@ -42,19 +49,23 @@ public class SettingsActivity extends AppCompatActivity {
                     return;
                 }
                 salaryPerHours = salary.length() == 0 ? 0 : Float.valueOf(salary);
+                sounds = switchSounds.isChecked();
                 writeToSharedPreferences();
                 finish();
             }
         });
+
     }
 
     private void readSharePreferences() {
         salaryPerHours = sharedPreferences.getFloat(HomeActivity.SALARY,25.0f);
+        sounds = sharedPreferences.getBoolean(HomeActivity.SOUNDS,false);
     }
 
     public void writeToSharedPreferences(){
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putFloat(HomeActivity.SALARY, salaryPerHours);
+        editor.putBoolean(HomeActivity.SOUNDS,sounds);
         editor.apply();
     }
 

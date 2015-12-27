@@ -1,12 +1,24 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    android:layout_width="350dp"
     android:layout_height="match_parent">
+    <TextView
+        android:layout_alignParentTop="true"
+        android:text="@string/first_setup"
+        android:gravity="center"
+        android:textColor="#000"
+        android:textStyle="bold"
+        android:background="#FFC107"
+        android:textSize="25sp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/textView" />
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
+        android:layout_marginTop="50dp"
         android:layout_marginBottom="50dp"
         android:background="#2979FF"
         android:orientation="vertical"
@@ -56,46 +68,58 @@
                     android:textColor="#ffffff"
                     android:textSize="22sp" />
             </LinearLayout>
-
-            <LinearLayout
+            <TextView
+                android:layout_marginTop="15dp"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:orientation="horizontal">
-
-                <Switch
-                    android:theme="@style/SwitchTheme"
-                    android:layout_marginLeft="10dp"
-                    android:gravity="left"
-                    android:layout_gravity="center"
-                    android:id="@+id/switchSound"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="right"
-                    android:text="@string/sounds"
-                    android:textColor="#ffffff"
-                    android:textSize="22sp" />
-            </LinearLayout>
-
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="right"
+                android:text="אנא הגדר את השכר שלך"
+                android:textColor="#ffffff"
+                android:textSize="17sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="right"
+                android:text="אם תבחר ב״דלג״ השכר לשעה יקבע למינימום"
+                android:textColor="#ffffff"
+                android:textSize="17sp" />
         </LinearLayout>
 
     </ScrollView>
-
-    <Button
-        android:id="@+id/btnSaveSettings"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
+    <LinearLayout
         android:layout_alignParentBottom="true"
-        android:background="#FFC107"
-        android:paddingEnd="0dp"
-        android:paddingStart="0dp"
-        android:text="@string/save_changes"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btnOk"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:background="#FFC107"
+            android:paddingEnd="0dp"
+            android:paddingStart="0dp"
+            android:text="@string/ok"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        <TextView
+            android:background="#000"
+            android:layout_width="2dp"
+            android:layout_height="match_parent" />
+        <Button
+            android:id="@+id/btnSkip"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:background="#FFC107"
+            android:paddingEnd="0dp"
+            android:paddingStart="0dp"
+            android:text="@string/skip"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </RelativeLayout>
 
