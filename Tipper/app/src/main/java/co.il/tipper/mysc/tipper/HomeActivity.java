@@ -72,7 +72,7 @@ public class HomeActivity extends AppCompatActivity {
     DBAdapter dbAdapter;
     ArrayList<Shift> allShifts;
     boolean isStartWorking = false;
-    boolean sounds = false;
+    boolean sounds = true;
     boolean showSetSalaryFragment = true;
     MediaPlayer mp;
 
@@ -385,7 +385,7 @@ public class HomeActivity extends AppCompatActivity {
         startTime = sharedPreferences.getLong(START_TIME, 0);
         dailyTips = sharedPreferences.getInt(DAILY_TIPS, 0);
         salary = sharedPreferences.getFloat(SALARY, 25.0f);
-        sounds = sharedPreferences.getBoolean(SOUNDS, false);
+        sounds = sharedPreferences.getBoolean(SOUNDS, true);
     }
 
     public void writeToSharedPreferences() {
