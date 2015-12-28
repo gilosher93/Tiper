@@ -2,6 +2,7 @@ package co.il.tipper.mysc.tipper;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,6 +26,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.sql.SQLException;
@@ -45,9 +47,10 @@ public class HomeActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 5;
     public static final String SALARY = "SALARY";
     public static final String FIRST_TIME = "FIRST_TIME";
-    LinearLayout layoutTipsAndSalary;
-    LinearLayout layoutSummary;
-    LinearLayout target;
+    LinearLayout layoutSummaryAndSalary;
+    LinearLayout layoutAverageSalaryPerHour;
+
+    RelativeLayout target;
     ViewGroup startWorkingLayout;
     ImageButton btnShekel1;
     ImageButton btnShekel2;
@@ -56,6 +59,7 @@ public class HomeActivity extends AppCompatActivity {
     ImageButton btnShekel20;
     SharedPreferences sharedPreferences;
     int moneyToAdd = 0;
+    TextView lblAverageSalaryPerHour;
     TextView lblDailyTips;
     TextView lblDailySalary;
     TextView lblDailySummary;
@@ -68,10 +72,11 @@ public class HomeActivity extends AppCompatActivity {
     int dailyTips = 0;
     float dailySalary = 0;
     float dailySummary = 0;
+    float averageSalaryPerHour = 0;
     long startTime = 0;
     DBAdapter dbAdapter;
     ArrayList<Shift> allShifts;
-    boolean isStartWorking = false;
+    boolean active = false;
     boolean sounds = true;
     boolean showSetSalaryFragment = true;
     MediaPlayer mp;
@@ -84,9 +89,9 @@ public class HomeActivity extends AppCompatActivity {
         mp = MediaPlayer.create(getBaseContext(), R.raw.coins_sound);
         dbAdapter = new DBAdapter(this);
         allShifts = new ArrayList<Shift>();
-        layoutTipsAndSalary = (LinearLayout) findViewById(R.id.layoutTipsAndSalary);
-        layoutSummary = (LinearLayout) findViewById(R.id.layoutSummary);
-        target = (LinearLayout) findViewById(R.id.layoutTarget);
+        layoutSummaryAndSalary = (LinearLayout) findViewById(R.id.layoutSummaryAndSalary);
+        layoutAverageSalaryPerHour = (LinearLayout) findViewById(R.id.layoutAverageSalaryPerHour);
+        target = (RelativeLayout) findViewById(R.id.layoutTarget);
         startWorkingLayout = (ViewGroup) findViewById(R.id.startWorkingLayout);
         sharedPreferences = getSharedPreferences(prefName, MODE_PRIVATE);
         btnShekel1 = (ImageButton) findViewById(R.id.btnShekel1);
@@ -100,21 +105,44 @@ public class HomeActivity extends AppCompatActivity {
         btnDecrease = (Button) findViewById(R.id.btnDecrease);
 
         txtHiddenText = (TextView) findViewById(R.id.txtHiddenText);
+        lblAverageSalaryPerHour = (TextView) findViewById(R.id.lblAverageSalaryPerHour);
         lblDailyTips = (TextView) findViewById(R.id.lblDailyTips);
         lblDailySalary = (TextView) findViewById(R.id.lblDailySalary);
         lblDailySummary = (TextView) findViewById(R.id.lblDailySummary);
         lblEnterTime = (TextView) findViewById(R.id.lblEnterTime);
-
+        lblEnterTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(active){
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(new Date(startTime));
+                    TimePickerDialog timePickerDialog = new TimePickerDialog(HomeActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                            long datePicked =  Shift.getLongByHour(hourOfDay,minute);
+                            if (datePicked > System.currentTimeMillis()){
+                                Toast.makeText(HomeActivity.this,"לא ניתן לבחור שעה עתידית",Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            startTime = datePicked;
+                            lblEnterTime.setText(getString(R.string.enter_time)+" "+ Shift.getHourString(startTime));
+                            calcAndPresentDailys();
+                        }
+                    },calendar.get(Calendar.HOUR_OF_DAY),calendar.get(Calendar.MINUTE),true);
+                    timePickerDialog.show();
+                }
+            }
+        });
         btnStartWorking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 TransitionManager.beginDelayedTransition(startWorkingLayout);
-                if (!isStartWorking) {
+                if (!active) {
                     dailyTips = sharedPreferences.getInt(DAILY_TIPS, 0);
                     startTime = System.currentTimeMillis();
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putLong(START_TIME, startTime);
-                    editor.putBoolean(IS_START_WORKING, isStartWorking);
+                    editor.putBoolean(IS_START_WORKING, active);
                     editor.apply();
                     connectUser();
                 } else {
@@ -184,6 +212,8 @@ public class HomeActivity extends AppCompatActivity {
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_normal));
                     dailyTips += moneyToAdd;
                     calcAndPresentDailys();
+
+                    //add sounds if allowed
                     if(sounds) {
                         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                         switch (audio.getRingerMode()) {
@@ -272,15 +302,15 @@ public class HomeActivity extends AppCompatActivity {
 
     private void connectUser() {
         //set the button position and text
-        isStartWorking = true;
+        active = true;
         btnStartWorking.setText(getString(R.string.end_shift));
         RelativeLayout.LayoutParams position = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         position.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         btnStartWorking.setLayoutParams(position);
 
         //set the UI visible
-        layoutTipsAndSalary.setVisibility(View.VISIBLE);
-        layoutSummary.setVisibility(View.VISIBLE);
+        layoutSummaryAndSalary.setVisibility(View.VISIBLE);
+        layoutAverageSalaryPerHour.setVisibility(View.VISIBLE);
         target.setVisibility(View.VISIBLE);
         btnShekel1.setVisibility(View.VISIBLE);
         btnShekel2.setVisibility(View.VISIBLE);
@@ -299,7 +329,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void disconnectUser() {
         //set the button position and text
-        isStartWorking = false;
+        active = false;
         btnStartWorking.setText(getString(R.string.start_shift));
         RelativeLayout.LayoutParams position = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         position.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
@@ -308,8 +338,8 @@ public class HomeActivity extends AppCompatActivity {
         //set the UI Invisible
         lblEnterTime.setText("");
         lblEnterTime.setVisibility(View.INVISIBLE);
-        layoutTipsAndSalary.setVisibility(View.INVISIBLE);
-        layoutSummary.setVisibility(View.INVISIBLE);
+        layoutSummaryAndSalary.setVisibility(View.INVISIBLE);
+        layoutAverageSalaryPerHour.setVisibility(View.INVISIBLE);
         target.setVisibility(View.INVISIBLE);
         btnShekel1.setVisibility(View.INVISIBLE);
         btnShekel2.setVisibility(View.INVISIBLE);
@@ -333,8 +363,20 @@ public class HomeActivity extends AppCompatActivity {
         float sumOfHours = (float) numberOfMinutes / 60 + numberOfHours;
         dailySalary = sumOfHours * sharedPreferences.getFloat(SALARY, 25.0f);
         dailySummary = dailyTips + dailySalary;
+        averageSalaryPerHour = sumOfHours > 1 ? (dailySummary == 0 ? 0 : dailySummary / sumOfHours) : 0;
         NumberFormat formatter = new DecimalFormat("#.##");
-        lblDailyTips.setText(dailyTips + "₪");
+        lblAverageSalaryPerHour.setText(averageSalaryPerHour == 0 ? getString(R.string.requires_hour_for_calc) : formatter.format(averageSalaryPerHour) + "₪" + " " + getString(R.string.per_hour));
+        if (dailyTips == 0){
+            lblDailyTips.setText(getString(R.string.drag_here_tips));
+            lblDailyTips.setTextSize(17);
+            btnDecrease.setVisibility(View.INVISIBLE);
+            btnIncrease.setVisibility(View.INVISIBLE);
+        }else{
+            lblDailyTips.setText(dailyTips + "₪");
+            lblDailyTips.setTextSize(25);
+            btnDecrease.setVisibility(View.VISIBLE);
+            btnIncrease.setVisibility(View.VISIBLE);
+        }
         lblDailySalary.setText(formatter.format(dailySalary) + "₪");
         lblDailySummary.setText(formatter.format(dailySummary) + "₪");
     }
@@ -345,7 +387,7 @@ public class HomeActivity extends AppCompatActivity {
         readFromSharedPreferences();
         checkForShowSetSalary();
         readFromDb();
-        if (isStartWorking && startTime != 0) {
+        if (active && startTime != 0) {
             connectUser();
         } else {
             disconnectUser();
@@ -368,6 +410,7 @@ public class HomeActivity extends AppCompatActivity {
             });
             setSalaryFragment.show(getFragmentManager(), "set salary");
             showSetSalaryFragment = false;
+            setSalaryFragment.setCancelable(false);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(FIRST_TIME, showSetSalaryFragment);
             editor.apply();
@@ -381,7 +424,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void readFromSharedPreferences() {
-        isStartWorking = sharedPreferences.getBoolean(IS_START_WORKING, false);
+        active = sharedPreferences.getBoolean(IS_START_WORKING, false);
         startTime = sharedPreferences.getLong(START_TIME, 0);
         dailyTips = sharedPreferences.getInt(DAILY_TIPS, 0);
         salary = sharedPreferences.getFloat(SALARY, 25.0f);
@@ -392,7 +435,7 @@ public class HomeActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(DAILY_TIPS, dailyTips);
         editor.putLong(START_TIME, startTime);
-        editor.putBoolean(IS_START_WORKING, isStartWorking);
+        editor.putBoolean(IS_START_WORKING, active);
         editor.putBoolean(SOUNDS, sounds);
         editor.apply();
     }

@@ -21,7 +21,7 @@
     <string name="button_start_shift">press on "Start Shift" to start the shift</string>
     <string name="start_shift">Start Shift</string>
     <string name="today_salary">Today Salary</string>
-    <string name="today_tips">sToday Tips</string>
+    <string name="today_tips">Today Tips</string>
     <string name="today_summary">Today Summary</string>
     <string name="shift_saved_successfully">Shift Saved Successfully</string>
     <string name="end_shift">End Shift</string>
@@ -31,6 +31,9 @@
     <string name="sounds">Sounds</string>
     <string name="skip">skip</string>
     <string name="first_setup">Initial setup</string>
+    <string name="average">Average Salary Per Hour</string>
+    <string name="per_hour">per hour</string>
+    <string name="requires_hour_for_calc">Requires at least an hour to calculate</string>
     <string-array name="months">
         <item>January</item>
         <item>February</item>

@@ -77,6 +77,14 @@ public class Shift implements Serializable {
         return getSumOfHours() * salaryPerHour;
     }
 
+    public float getSummary() {
+        return getSalary() + tipsCount;
+    }
+
+    public float getAverageSalaryPerHour(){
+        return getSummary()/getSumOfHours();
+    }
+
     public float getSumOfHours() {
         int distance = distanceMinutes(startTime, endTime);
         int numberOfHours = distance / 60;
@@ -101,6 +109,12 @@ public class Shift implements Serializable {
         return hour + ":" + minute;
     }
 
+    public static String getHourString(long hourInLong) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(hourInLong));
+        return getHourString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+    }
+
     public static long getFullDateInLong(String dateInString) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd, HH:mm");
         Date d = null;
@@ -112,8 +126,19 @@ public class Shift implements Serializable {
         return d.getTime();
     }
 
-    public float getSummary() {
-        return getSalary() + tipsCount;
+    public static long getLongByHour(int hour, int minutes) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(System.currentTimeMillis()));
+        String dateToParse = String.valueOf(calendar.get(Calendar.YEAR))+"-"+String.valueOf(calendar.get(Calendar.MONTH)+1)
+                +"-"+String.valueOf(calendar.get(Calendar.DAY_OF_MONTH))+", " + getHourString(hour, minutes);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd, HH:mm");
+        Date d = null;
+        try {
+            d = df.parse(dateToParse);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return d.getTime();
     }
 
     public static String whatTimeIsIt(Long time) {

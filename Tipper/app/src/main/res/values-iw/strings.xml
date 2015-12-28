@@ -32,6 +32,9 @@
     <string name="sounds">צלילים באפליקציה</string>
     <string name="skip">דלג</string>
     <string name="first_setup">הגדרה ראשונית</string>
+    <string name="average">שכר ממוצע לשעה</string>
+    <string name="per_hour">לשעה</string>
+    <string name="requires_hour_for_calc">נדרש לפחות שעה לחישוב</string>
     <string-array name ="months">
         <item>ינואר</item>
         <item>פברואר</item>
