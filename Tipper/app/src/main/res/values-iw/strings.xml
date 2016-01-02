@@ -35,6 +35,21 @@
     <string name="average">שכר ממוצע לשעה</string>
     <string name="per_hour">לשעה</string>
     <string name="requires_hour_for_calc">נדרש לפחות שעה לחישוב</string>
+    <string name="next">המשך</string>
+    <string name="welcome_to">ברוכים הבאים ל</string>
+    <string name="brief_explanation_app">לפניך הסבר קצר על האפליקציה</string>
+    <string name="change_the_start_time">ניתן לשנות את שעת ההתחלה ע״י לחיצה על השעה</string>
+    <string name="daily_salary">שכר יומי</string>
+    <string name="watch_your_daily_salary">כאן תוכל לצפות במשכורת היומי שלך בזמן אמת</string>
+    <string name="the_screen_is_refreshed">בכל פעם שתיכנס לאפליקציה, המסך יתעדכן</string>
+    <string name="watch_your_average_wage">כאן תוכל לצפות בשכר הממוצע שלך</string>
+    <string name="example_average">לדוגמא: אם עשית בשעתיים 50₪ במשכורת ועוד 70₪ בטיפים סה״כ צברת 120₪ בשעתיים שהן 60₪ בממוצע</string>
+    <string name="Total_salary">משכורת כוללת</string>
+    <string name="watch_your_total_salary">כאן תוכל לצפות בסה״כ השכר שלך כולל הטיפים שצברת</string>
+    <string name="watch_how_much_tips">כאן תוכל לצפות כמה טיפים צברת</string>
+    <string name="Simply_drag_here_Tips">פשוט גרור לכאן טיפים</string>
+    <string name="total">סה״כ</string>
+    <string name="average_salary">שכר ממוצע</string>
     <string-array name ="months">
         <item>ינואר</item>
         <item>פברואר</item>

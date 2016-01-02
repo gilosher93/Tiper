@@ -64,4 +64,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content" />
     </LinearLayout>
+    <TextView
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:background="#bdbdbd"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp" />
+    <TextView
+        android:textColor="#FFFFFFFF"
+        android:id="@+id/txtAverageSalaryPerHour"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textSize="17sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>

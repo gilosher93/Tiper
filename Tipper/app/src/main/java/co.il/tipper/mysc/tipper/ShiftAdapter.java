@@ -33,6 +33,7 @@ public class ShiftAdapter extends ArrayAdapter<Shift> {
         TextView txtSalary;
         TextView txtTips;
         TextView txtDate;
+        TextView txtAverageSalaryPerHour;
     }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -48,6 +49,7 @@ public class ShiftAdapter extends ArrayAdapter<Shift> {
             viewContainer.txtSalary = (TextView) rowView.findViewById(R.id.txtSalary);
             viewContainer.txtTips = (TextView) rowView.findViewById(R.id.txtTips);
             viewContainer.txtDate = (TextView) rowView.findViewById(R.id.txtDate);
+            viewContainer.txtAverageSalaryPerHour = (TextView) rowView.findViewById(R.id.txtAverageSalaryPerHour);
             rowView.setTag(viewContainer);
         } else {
             viewContainer = (ViewContainer) rowView.getTag();
@@ -58,10 +60,11 @@ public class ShiftAdapter extends ArrayAdapter<Shift> {
             viewContainer.txtDate.setText(simpleDateFormat.format(new Date(shift.startTime)));
             viewContainer.txtTimes.setText(Shift.whatTimeIsIt(shift.startTime)+" - "+Shift.whatTimeIsIt(shift.endTime));
             viewContainer.txtSumOfTimes.setText(activity.getResources().getString(R.string.sum_of_hours) + ": " + shift.getSumOfHoursString());
-            NumberFormat formatter = new DecimalFormat("#.##");
-            viewContainer.txtTips.setText(activity.getResources().getString(R.string.tips) +": "+ shift.getTipsCount());
-            viewContainer.txtSalary.setText(activity.getResources().getString(R.string.salary) + ": " + formatter.format(shift.getSalary()));
-            viewContainer.txtSummary.setText(activity.getResources().getString(R.string.summary) + ": " + formatter.format(shift.getSummary()));
+            NumberFormat formatter = new DecimalFormat("#");
+            viewContainer.txtTips.setText(activity.getResources().getString(R.string.tips) +": "+ shift.getTipsCount()+"₪");
+            viewContainer.txtSalary.setText(activity.getResources().getString(R.string.salary) + ": " + formatter.format(shift.getSalary())+"₪");
+            viewContainer.txtSummary.setText(activity.getResources().getString(R.string.total) + ": " + formatter.format(shift.getSummary())+"₪");
+            viewContainer.txtAverageSalaryPerHour.setText(activity.getResources().getString(R.string.average_salary) + ": " + formatter.format(shift.getAverageSalaryPerHour())+"₪ " + activity.getResources().getString(R.string.per_hour));
         }
         return rowView;
     }

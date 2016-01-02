@@ -3,7 +3,7 @@
     <string name="title_activity_create_manual_shift">CreateManualShift</string>
     <string name="title_activity_recent_shifts">Recent Shifts</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="sum_of_hours">Total Hours</string>
+    <string name="sum_of_hours">Hours</string>
     <string name="summary">Summary</string>
     <string name="salary">Salary</string>
     <string name="tips">Tips</string>
@@ -34,6 +34,21 @@
     <string name="average">Average Salary Per Hour</string>
     <string name="per_hour">per hour</string>
     <string name="requires_hour_for_calc">Requires at least an hour to calculate</string>
+    <string name="next">next</string>
+    <string name="welcome_to">Welcome To </string>
+    <string name="brief_explanation_app">Here is a brief explanation app</string>
+    <string name="change_the_start_time">You can change the start time by pressing the clock</string>
+    <string name="daily_salary">Daily Salary</string>
+    <string name="watch_your_daily_salary">Here you can watch your daily salary in real time</string>
+    <string name="the_screen_is_refreshed">Every time you sign an application, the screen is refreshed</string>
+    <string name="watch_your_average_wage">Here you can watch your average wage</string>
+    <string name="example_average">For example, if you did two hours 50₪ salary and another 70₪ tips you accumulated total of two hours they 120₪, 60₪ average</string>
+    <string name="Total_salary">Total Salary</string>
+    <string name="watch_your_total_salary">Here you can watch your total salary including tips you have earned</string>
+    <string name="watch_how_much_tips">Here you can watch how much tips you have earned</string>
+    <string name="Simply_drag_here_Tips">Simply drag here Tips</string>
+    <string name="total">Total</string>
+    <string name="average_salary">Average salary</string>
     <string-array name="months">
         <item>January</item>
         <item>February</item>

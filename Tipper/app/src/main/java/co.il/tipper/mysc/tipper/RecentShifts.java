@@ -2,6 +2,7 @@ package co.il.tipper.mysc.tipper;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -41,9 +42,11 @@ public class RecentShifts extends AppCompatActivity {
     TextView txtTotalSummary;
     TextView txtTotalSalary;
     TextView txtTotalTips;
+    TextView txtTotalAverage;
     int totalTips = 0;
     float totalSalary = 0;
     float totalSummary = 0;
+    float totalAverage = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +62,7 @@ public class RecentShifts extends AppCompatActivity {
         txtTotalSummary = (TextView) findViewById(R.id.txtTotalSummary);
         txtTotalSalary = (TextView) findViewById(R.id.txtTotalSalary);
         txtTotalTips = (TextView) findViewById(R.id.txtTotalTips);
+        txtTotalAverage = (TextView) findViewById(R.id.txtTotalAverage);
 
         Date date = new Date(System.currentTimeMillis());
         calendar = Calendar.getInstance();
@@ -76,13 +80,16 @@ public class RecentShifts extends AppCompatActivity {
                 currentShifts.add(shift);
                 totalTips += shift.getTipsCount();
                 totalSalary += shift.getSalary();
+                totalAverage += shift.getAverageSalaryPerHour();
             }
         }
         totalSummary = totalTips + totalSalary;
         NumberFormat formatter = new DecimalFormat("#.##");
-        txtTotalSummary.setText(getResources().getString(R.string.summary) + ": " + formatter.format(totalSummary));
-        txtTotalSalary.setText(getResources().getString(R.string.salary) + ": " + formatter.format(totalSalary));
-        txtTotalTips.setText(getResources().getString(R.string.tips) + ": " + totalTips);
+        totalAverage /= currentShifts.size();
+        txtTotalAverage.setText(getResources().getString(R.string.average_salary) + ": " + formatter.format(totalAverage)+"₪"+getResources().getString(R.string.per_hour));
+        txtTotalSummary.setText(formatter.format(totalSummary)+"₪");
+        txtTotalSalary.setText(formatter.format(totalSalary)+"₪");
+        txtTotalTips.setText(totalTips+"₪");
         lstShifts = (ListView) findViewById(R.id.lstShifts);
         shiftAdapter = new ShiftAdapter(this, currentShifts);
         lstShifts.setAdapter(shiftAdapter);
@@ -114,28 +121,41 @@ public class RecentShifts extends AppCompatActivity {
         lstShifts.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM");
-                AlertDialog.Builder builder = new AlertDialog.Builder(RecentShifts.this)
-                        .setTitle(getString(R.string.delete_shift_title))
-                        .setMessage(getString(R.string.delete_shift_query)+" "+simpleDateFormat.format(new Date(currentShifts.get(position).startTime)) + " ?")
-                        .setCancelable(true)
-                        .setPositiveButton(android.R.string.yes,
-                                new Dialog.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int k) {
-                                        removeShift(position);
-                                        notifyChanges();
-                                        Toast.makeText(getBaseContext(), "משמרת נמחקה בהצלחה!", Toast.LENGTH_LONG).show();
-                                    }
-                                })
-                        .setNegativeButton(android.R.string.no,
-                                new Dialog.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
+                ShiftOptionFragment shiftOptionFragment = new ShiftOptionFragment();
+                shiftOptionFragment.setFragment(new ShiftOptionFragment.OnSelectShiftOptionListener() {
 
-                                    }
-                                });
-                builder.create().show();
+                    @Override
+                    public void editShift() {
+
+                    }
+
+                    @Override
+                    public void deleteShift() {
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM");
+                        AlertDialog.Builder builder = new AlertDialog.Builder(RecentShifts.this)
+                                .setTitle(getString(R.string.delete_shift_title))
+                                .setMessage(getString(R.string.delete_shift_query) + " " + simpleDateFormat.format(new Date(currentShifts.get(position).startTime)) + " ?")
+                                .setCancelable(true)
+                                .setPositiveButton(android.R.string.yes,
+                                        new Dialog.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int k) {
+                                                removeShift(position);
+                                                notifyChanges();
+                                                Toast.makeText(getBaseContext(), "משמרת נמחקה בהצלחה!", Toast.LENGTH_LONG).show();
+                                            }
+                                        })
+                                .setNegativeButton(android.R.string.no,
+                                        new Dialog.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+
+                                            }
+                                        });
+                        builder.create().show();
+                    }
+                });
+                shiftOptionFragment.show(getFragmentManager(),"shift option fragment");
                 return true;
             }
         });
@@ -186,6 +206,7 @@ public class RecentShifts extends AppCompatActivity {
         currentShifts.clear();
         totalSalary = 0;
         totalTips = 0;
+        totalAverage = 0;
         Shift shift;
         for (int i = 0; i < allShifts.size(); i++) {
             shift = allShifts.get(i);
@@ -194,14 +215,17 @@ public class RecentShifts extends AppCompatActivity {
                 currentShifts.add(shift);
                 totalTips += shift.getTipsCount();
                 totalSalary += shift.getSalary();
+                totalAverage += shift.getAverageSalaryPerHour();
             }
 
         }
         totalSummary = totalTips + totalSalary;
+        totalAverage = currentShifts.size() > 0 ? totalAverage / currentShifts.size() : 0;
         NumberFormat formatter = new DecimalFormat("#.##");
-        txtTotalSummary.setText(getResources().getString(R.string.summary) + ": " + formatter.format(totalSummary));
-        txtTotalSalary.setText(getResources().getString(R.string.salary) + ": " + formatter.format(totalSalary));
-        txtTotalTips.setText(getResources().getString(R.string.tips) + ": " + totalTips);
+        txtTotalAverage.setText(getResources().getString(R.string.average_salary) + ": " + formatter.format(totalAverage)+"₪ "+getResources().getString(R.string.per_hour));
+        txtTotalSummary.setText(formatter.format(totalSummary)+"₪");
+        txtTotalSalary.setText(formatter.format(totalSalary)+"₪");
+        txtTotalTips.setText(totalTips+"₪");
         shiftAdapter.notifyDataSetChanged();
     }
 

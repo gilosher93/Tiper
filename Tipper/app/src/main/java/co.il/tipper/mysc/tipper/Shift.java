@@ -82,7 +82,7 @@ public class Shift implements Serializable {
     }
 
     public float getAverageSalaryPerHour(){
-        return getSummary()/getSumOfHours();
+        return getSumOfHours() > 1 ? (getSummary() == 0 ? 0 : getSummary()/getSumOfHours()): 0;
     }
 
     public float getSumOfHours() {

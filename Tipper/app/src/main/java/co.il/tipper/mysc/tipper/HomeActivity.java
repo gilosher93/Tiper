@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +30,9 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
+
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -36,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String SOUNDS = "SOUNDS";
     public static final String prefName = "prefName";
@@ -47,9 +51,10 @@ public class HomeActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 5;
     public static final String SALARY = "SALARY";
     public static final String FIRST_TIME = "FIRST_TIME";
+    public static final String READ_HOME_SHOW_CASE = "readHomeShowCase";
     LinearLayout layoutSummaryAndSalary;
     LinearLayout layoutAverageSalaryPerHour;
-
+    ShowcaseView showcase;
     RelativeLayout target;
     ViewGroup startWorkingLayout;
     ImageButton btnShekel1;
@@ -74,10 +79,12 @@ public class HomeActivity extends AppCompatActivity {
     float dailySummary = 0;
     float averageSalaryPerHour = 0;
     long startTime = 0;
+    int counter = 0;
     DBAdapter dbAdapter;
     ArrayList<Shift> allShifts;
     boolean active = false;
     boolean sounds = true;
+    boolean readHomeShowCase = false;
     boolean showSetSalaryFragment = true;
     MediaPlayer mp;
 
@@ -114,19 +121,22 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(active){
-                    Calendar calendar = Calendar.getInstance();
+                    final Calendar calendar = Calendar.getInstance();
                     calendar.setTime(new Date(startTime));
                     TimePickerDialog timePickerDialog = new TimePickerDialog(HomeActivity.this, new TimePickerDialog.OnTimeSetListener() {
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                            long datePicked =  Shift.getLongByHour(hourOfDay,minute);
-                            if (datePicked > System.currentTimeMillis()){
-                                Toast.makeText(HomeActivity.this,"לא ניתן לבחור שעה עתידית",Toast.LENGTH_SHORT).show();
+                            long datePicked =  Shift.getLongByHour(hourOfDay, minute);
+                            if (datePicked > System.currentTimeMillis()) {
+                                Toast.makeText(getBaseContext(),"לא ניתן לבחור שעה עתידית",Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             startTime = datePicked;
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putLong(START_TIME, startTime);
+                            editor.apply();
                             lblEnterTime.setText(getString(R.string.enter_time)+" "+ Shift.getHourString(startTime));
-                            calcAndPresentDailys();
+                            calcAndPresentDaily();
                         }
                     },calendar.get(Calendar.HOUR_OF_DAY),calendar.get(Calendar.MINUTE),true);
                     timePickerDialog.show();
@@ -156,6 +166,7 @@ public class HomeActivity extends AppCompatActivity {
                                         public void onClick(DialogInterface dialogInterface, int i) {
                                             long currentStartTime = sharedPreferences.getLong(START_TIME, 0);
                                             long endTime = System.currentTimeMillis();
+                                            Log.d("Gil",Shift.whatTimeIsIt(currentStartTime));
                                             Shift shiftToAdd = new Shift(currentStartTime, endTime, salary, dailyTips, allShifts.size() + 1);
                                             allShifts.add(shiftToAdd);
                                             writingToDb(shiftToAdd);
@@ -179,14 +190,14 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dailyTips++;
-                calcAndPresentDailys();
+                calcAndPresentDaily();
             }
         });
         btnDecrease.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 dailyTips = 0;
-                calcAndPresentDailys();
+                calcAndPresentDaily();
                 return true;
             }
         });
@@ -195,7 +206,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (dailyTips > 0) {
                     dailyTips--;
-                    calcAndPresentDailys();
+                    calcAndPresentDaily();
                 }
             }
         });
@@ -211,19 +222,20 @@ public class HomeActivity extends AppCompatActivity {
                 if (result && action == DragEvent.ACTION_DRAG_ENDED) {
                     target.setBackground(getResources().getDrawable(R.drawable.shape_target_normal));
                     dailyTips += moneyToAdd;
-                    calcAndPresentDailys();
+                    calcAndPresentDaily();
 
-                    //add sounds if allowed
+                    //add sounds or vibrate
                     if(sounds) {
                         AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                         switch (audio.getRingerMode()) {
                             case AudioManager.RINGER_MODE_NORMAL:
                                 if (mp.isPlaying())
                                     mp.seekTo(0);
                                 mp.start();
+                                vibrator.vibrate(200);
                                 break;
                             case AudioManager.RINGER_MODE_VIBRATE:
-                                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                                 vibrator.vibrate(400);
                                 break;
                         }
@@ -302,6 +314,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void connectUser() {
         //set the button position and text
+
         active = true;
         btnStartWorking.setText(getString(R.string.end_shift));
         RelativeLayout.LayoutParams position = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -309,6 +322,15 @@ public class HomeActivity extends AppCompatActivity {
         btnStartWorking.setLayoutParams(position);
 
         //set the UI visible
+        releaseUI();
+
+        // setup and present the fields
+        calcAndPresentDaily();
+        if(readHomeShowCase)
+            presentShowCase();
+    }
+
+    private void releaseUI() {
         layoutSummaryAndSalary.setVisibility(View.VISIBLE);
         layoutAverageSalaryPerHour.setVisibility(View.VISIBLE);
         target.setVisibility(View.VISIBLE);
@@ -320,11 +342,21 @@ public class HomeActivity extends AppCompatActivity {
         txtHiddenText.setVisibility(View.INVISIBLE);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(startTime));
-        lblEnterTime.setText(getString(R.string.enter_time)+" "+ Shift.getHourString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
+        lblEnterTime.setText(getString(R.string.enter_time) + " " + Shift.getHourString(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)));
         lblEnterTime.setVisibility(View.VISIBLE);
+    }
 
-        // setup and present the fields
-        calcAndPresentDailys();
+    public void presentShowCase(){
+        showcase = new ShowcaseView.Builder(this)
+                .withMaterialShowcase()
+                .setOnClickListener(this)
+                .setContentTitle(getString(R.string.welcome_to) + getString(R.string.app_name))
+                .setContentText(getString(R.string.brief_explanation_app))
+                .build();
+        showcase.setStyle(R.style.CustomShowcaseTheme2);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(READ_HOME_SHOW_CASE, false);
+        editor.apply();
     }
 
     private void disconnectUser() {
@@ -336,6 +368,17 @@ public class HomeActivity extends AppCompatActivity {
         btnStartWorking.setLayoutParams(position);
 
         //set the UI Invisible
+        lockUI();
+
+        //reset fields
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong(START_TIME, 0);
+        editor.putInt(DAILY_TIPS, 0);
+        editor.apply();
+
+    }
+
+    private void lockUI() {
         lblEnterTime.setText("");
         lblEnterTime.setVisibility(View.INVISIBLE);
         layoutSummaryAndSalary.setVisibility(View.INVISIBLE);
@@ -347,23 +390,20 @@ public class HomeActivity extends AppCompatActivity {
         btnShekel10.setVisibility(View.INVISIBLE);
         btnShekel20.setVisibility(View.INVISIBLE);
         txtHiddenText.setVisibility(View.VISIBLE);
-
-        //reset fields
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putLong(START_TIME, 0);
-        editor.putInt(DAILY_TIPS, 0);
-        editor.apply();
-
     }
 
-    public void calcAndPresentDailys() {
+    public void calcAndPresentDaily() {
         int distance = Shift.distanceMinutes(startTime, System.currentTimeMillis());
         int numberOfHours = distance / 60;
         int numberOfMinutes = distance % 60;
         float sumOfHours = (float) numberOfMinutes / 60 + numberOfHours;
         dailySalary = sumOfHours * sharedPreferences.getFloat(SALARY, 25.0f);
         dailySummary = dailyTips + dailySalary;
+        float average = averageSalaryPerHour;
         averageSalaryPerHour = sumOfHours > 1 ? (dailySummary == 0 ? 0 : dailySummary / sumOfHours) : 0;
+        if (average != 0 && averageSalaryPerHour != average) {
+            Log.d("Gil", averageSalaryPerHour > average ? "Up" : "Down");
+        }
         NumberFormat formatter = new DecimalFormat("#.##");
         lblAverageSalaryPerHour.setText(averageSalaryPerHour == 0 ? getString(R.string.requires_hour_for_calc) : formatter.format(averageSalaryPerHour) + "₪" + " " + getString(R.string.per_hour));
         if (dailyTips == 0){
@@ -387,12 +427,16 @@ public class HomeActivity extends AppCompatActivity {
         readFromSharedPreferences();
         checkForShowSetSalary();
         readFromDb();
-        if (active && startTime != 0) {
+        if (active && startTime != 0)
             connectUser();
-        } else {
+        else
             disconnectUser();
-        }
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        writeToSharedPreferences();
     }
 
     private void checkForShowSetSalary() {
@@ -417,18 +461,13 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        writeToSharedPreferences();
-    }
-
     public void readFromSharedPreferences() {
         active = sharedPreferences.getBoolean(IS_START_WORKING, false);
         startTime = sharedPreferences.getLong(START_TIME, 0);
         dailyTips = sharedPreferences.getInt(DAILY_TIPS, 0);
         salary = sharedPreferences.getFloat(SALARY, 25.0f);
         sounds = sharedPreferences.getBoolean(SOUNDS, true);
+        readHomeShowCase = sharedPreferences.getBoolean(READ_HOME_SHOW_CASE,true);
     }
 
     public void writeToSharedPreferences() {
@@ -463,7 +502,6 @@ public class HomeActivity extends AppCompatActivity {
                 Intent settingsActivity = new Intent(this, SettingsActivity.class);
                 startActivity(settingsActivity);
                 break;
-
             case R.id.action_table:
                 Intent recentShifts = new Intent(this, RecentShifts.class);
                 recentShifts.putExtra(ALL_SHIFTS, allShifts);
@@ -507,4 +545,44 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onClick(View v) {
+        switch (counter) {
+            case 0:
+                showcase.setShowcase(new ViewTarget(lblEnterTime), true);
+                showcase.setContentTitle(getString(R.string.enter_time));
+                showcase.setContentText(getString(R.string.change_the_start_time));
+                showcase.setButtonText(getString(R.string.next));
+                break;
+            case 1:
+                showcase.setShowcase(new ViewTarget(lblDailySalary), true);
+                showcase.setContentTitle(getString(R.string.daily_salary));
+                showcase.setContentText(getString(R.string.watch_your_daily_salary) + "\n" + getString(R.string.the_screen_is_refreshed));
+                showcase.setButtonText(getString(R.string.next));
+                break;
+            case 2:
+                showcase.setShowcase(new ViewTarget(lblAverageSalaryPerHour), true);
+                showcase.setContentTitle(getString(R.string.average));
+                showcase.setContentText(getString(R.string.watch_your_average_wage) + "\n" +getString(R.string.example_average));
+                showcase.setButtonText(getString(R.string.next));
+                break;
+            case 3:
+                showcase.setShowcase(new ViewTarget(lblDailySummary), true);
+                showcase.setContentTitle(getString(R.string.Total_salary));
+                showcase.setContentText(getString(R.string.watch_your_total_salary));
+                showcase.setButtonText(getString(R.string.next));
+                break;
+            case 4:
+                showcase.setShowcase(new ViewTarget(lblDailyTips), true);
+                showcase.setContentTitle(getString(R.string.tips));
+                showcase.setContentText(getString(R.string.watch_how_much_tips) + "\n" + getString(R.string.Simply_drag_here_Tips));
+                showcase.setButtonText(getString(R.string.end_shift));
+                break;
+            case 5:
+                showcase.hide();
+                break;
+        }
+        counter++;
+
+    }
 }
