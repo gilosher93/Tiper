@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#2979FF"
     android:orientation="vertical"
-    tools:context="co.il.tipper.mysc.tipper.RecentShifts">
+    tools:context=".fragments.RecentShiftsFragment">
 
     <LinearLayout
         android:padding="10dp"

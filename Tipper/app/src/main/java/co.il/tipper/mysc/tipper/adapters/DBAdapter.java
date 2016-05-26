@@ -1,4 +1,4 @@
-package co.il.tipper.mysc.tipper;
+package co.il.tipper.mysc.tipper.adapters;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.sql.SQLException;
+
+import co.il.tipper.mysc.tipper.objects.Shift;
 
 /**
  * Created by Mysc on 13/10/15.
@@ -75,10 +77,10 @@ public class DBAdapter {
     public long insertShiftToDB(Shift shift) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(SHIFT_ID, shift.getId());
-        contentValues.put(START_TIME, shift.startTime);
-        contentValues.put(END_TIME, shift.endTime);
+        contentValues.put(START_TIME, shift.getStartTime());
+        contentValues.put(END_TIME, shift.getEndTime());
         contentValues.put(SUM_OF_HOURS, shift.getSumOfHoursString());
-        contentValues.put(SALARY, shift.salaryPerHour);
+        contentValues.put(SALARY, shift.getSalaryPerHour());
         contentValues.put(TIPS, shift.getTipsCount());
         contentValues.put(SUMMARY, shift.getSummary());
         return db.insert(DATABASE_TABLE, null, contentValues);

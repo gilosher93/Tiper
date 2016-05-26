@@ -1,4 +1,4 @@
-package co.il.tipper.mysc.tipper;
+package co.il.tipper.mysc.tipper.objects;
 
 import java.io.Serializable;
 import java.text.DateFormat;

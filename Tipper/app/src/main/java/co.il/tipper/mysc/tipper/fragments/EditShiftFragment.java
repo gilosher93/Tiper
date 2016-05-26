@@ -1,4 +1,4 @@
-package co.il.tipper.mysc.tipper;
+package co.il.tipper.mysc.tipper.fragments;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
+
+import co.il.tipper.mysc.tipper.R;
 
 /**
  * Created by Mysc on 2.1.2016.

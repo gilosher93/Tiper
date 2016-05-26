@@ -1,12 +1,14 @@
-package co.il.tipper.mysc.tipper;
+package co.il.tipper.mysc.tipper.fragments;
 
+import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -15,8 +17,12 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
-public class CreateManualShift extends AppCompatActivity {
+import co.il.tipper.mysc.tipper.HomeActivity;
+import co.il.tipper.mysc.tipper.R;
+import co.il.tipper.mysc.tipper.objects.Shift;
+import co.il.tipper.mysc.tipper.adapters.DBAdapter;
 
+public class CreateManualShift extends Fragment {
 
     TimePicker startPicker;
     TimePicker endPicker;
@@ -26,19 +32,27 @@ public class CreateManualShift extends AppCompatActivity {
     Button btnCancel;
     SharedPreferences sharedPreferences;
     DBAdapter dbAdapter;
+    private CreateManualShiftListener listener;
 
+    public void setFragment(CreateManualShiftListener listener){
+        this.listener = listener;
+    }
+
+    public interface CreateManualShiftListener{
+        void addShift(Shift shift);
+    }
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_manual_shift);
-        dbAdapter = new DBAdapter(this);
-        sharedPreferences = getSharedPreferences(HomeActivity.prefName, MODE_PRIVATE);
-        startPicker = (TimePicker) findViewById(R.id.startPicker);
-        endPicker = (TimePicker) findViewById(R.id.endPicker);
-        datePicker = (DatePicker) findViewById(R.id.datePicker);
-        btnOk = (Button) findViewById(R.id.btnOk);
-        btnCancel = (Button) findViewById(R.id.btnCancel);
-        txtTips = (EditText) findViewById(R.id.txtManualTips);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_create_manual_shift,container, false);
+        dbAdapter = new DBAdapter(getActivity());
+        sharedPreferences = getActivity().getSharedPreferences(HomeActivity.prefName, Context.MODE_PRIVATE);
+        startPicker = (TimePicker) view.findViewById(R.id.startPicker);
+        endPicker = (TimePicker) view.findViewById(R.id.endPicker);
+        datePicker = (DatePicker) view.findViewById(R.id.datePicker);
+        btnOk = (Button) view.findViewById(R.id.btnOk);
+        btnCancel = (Button) view.findViewById(R.id.btnCancel);
+        txtTips = (EditText) view.findViewById(R.id.txtManualTips);
         endPicker.setIs24HourView(true);
         startPicker.setIs24HourView(true);
         Calendar calendar = Calendar.getInstance();
@@ -51,7 +65,7 @@ public class CreateManualShift extends AppCompatActivity {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                getFragmentManager().popBackStack();
             }
         });
         btnOk.setOnClickListener(new View.OnClickListener() {
@@ -70,15 +84,16 @@ public class CreateManualShift extends AppCompatActivity {
                 long startTime = Shift.getFullDateInLong(year + "-" + month + "-" + day + ", " + startHour + ":" + startMinutes);
                 long endTime = Shift.getFullDateInLong(year + "-" + month + "-" + day + ", " + endHour + ":" + endMinutes);
                 Shift shift = new Shift(startTime, endTime, salary, manualTips,getShiftCountFromDb()+1);
-                writingToDb(shift);
-                setResult(RESULT_OK);
-                finish();
+                listener.addShift(shift);
+                getFragmentManager().popBackStack();
             }
         });
+        return view;
     }
+
     void writingToDb(Shift shift){
         try {
-            dbAdapter = new DBAdapter(this);
+            dbAdapter = new DBAdapter(getActivity());
             dbAdapter.open();
             dbAdapter.insertShiftToDB(shift);
             dbAdapter.close();
@@ -99,27 +114,6 @@ public class CreateManualShift extends AppCompatActivity {
             e.printStackTrace();
         }
         return count;
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_create_manual_shift, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
 }

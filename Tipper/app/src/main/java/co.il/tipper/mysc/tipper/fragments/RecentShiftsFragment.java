@@ -1,17 +1,16 @@
-package co.il.tipper.mysc.tipper;
+package co.il.tipper.mysc.tipper.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.TimePickerDialog;
+import android.app.Fragment;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -26,9 +25,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-public class RecentShifts extends AppCompatActivity {
+import co.il.tipper.mysc.tipper.R;
+import co.il.tipper.mysc.tipper.objects.Shift;
+import co.il.tipper.mysc.tipper.adapters.DBAdapter;
+import co.il.tipper.mysc.tipper.adapters.ShiftAdapter;
 
-    Intent intent;
+public class RecentShiftsFragment extends Fragment {
+
     Spinner spnYear;
     Spinner spnMonth;
     ListView lstShifts;
@@ -48,21 +51,22 @@ public class RecentShifts extends AppCompatActivity {
     float totalSummary = 0;
     float totalAverage = 0;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recent_shifts);
+    public void setFragment(ArrayList<Shift> shifts){
+        this.allShifts = shifts;
+    }
 
-        intent = getIntent();
-        dbAdapter = new DBAdapter(this);
-        allShifts = (ArrayList<Shift>) intent.getSerializableExtra(HomeActivity.ALL_SHIFTS);
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_recent_shifts, container, false);
+        dbAdapter = new DBAdapter(getActivity().getApplicationContext());
         currentShifts = new ArrayList<Shift>();
-        spnYear = (Spinner) findViewById(R.id.spnYear);
-        spnMonth = (Spinner) findViewById(R.id.spnMonth);
-        txtTotalSummary = (TextView) findViewById(R.id.txtTotalSummary);
-        txtTotalSalary = (TextView) findViewById(R.id.txtTotalSalary);
-        txtTotalTips = (TextView) findViewById(R.id.txtTotalTips);
-        txtTotalAverage = (TextView) findViewById(R.id.txtTotalAverage);
+        spnYear = (Spinner) view.findViewById(R.id.spnYear);
+        spnMonth = (Spinner) view.findViewById(R.id.spnMonth);
+        txtTotalSummary = (TextView) view.findViewById(R.id.txtTotalSummary);
+        txtTotalSalary = (TextView) view.findViewById(R.id.txtTotalSalary);
+        txtTotalTips = (TextView) view.findViewById(R.id.txtTotalTips);
+        txtTotalAverage = (TextView) view.findViewById(R.id.txtTotalAverage);
 
         Date date = new Date(System.currentTimeMillis());
         calendar = Calendar.getInstance();
@@ -75,7 +79,7 @@ public class RecentShifts extends AppCompatActivity {
         Shift shift;
         for (int i = 0; i < allShifts.size(); i++) {
             shift = allShifts.get(i);
-            calendar.setTime(new Date(shift.startTime));
+            calendar.setTime(new Date(shift.getStartTime()));
             if (calendar.get(Calendar.MONTH) == selectedMonth && calendar.get(Calendar.YEAR) == selectedYear) {
                 currentShifts.add(shift);
                 totalTips += shift.getTipsCount();
@@ -90,8 +94,8 @@ public class RecentShifts extends AppCompatActivity {
         txtTotalSummary.setText(formatter.format(totalSummary)+"₪");
         txtTotalSalary.setText(formatter.format(totalSalary)+"₪");
         txtTotalTips.setText(totalTips+"₪");
-        lstShifts = (ListView) findViewById(R.id.lstShifts);
-        shiftAdapter = new ShiftAdapter(this, currentShifts);
+        lstShifts = (ListView) view.findViewById(R.id.lstShifts);
+        shiftAdapter = new ShiftAdapter(getActivity().getApplicationContext(), currentShifts);
         lstShifts.setAdapter(shiftAdapter);
         spnMonth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -132,9 +136,9 @@ public class RecentShifts extends AppCompatActivity {
                     @Override
                     public void deleteShift() {
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM");
-                        AlertDialog.Builder builder = new AlertDialog.Builder(RecentShifts.this)
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                                 .setTitle(getString(R.string.delete_shift_title))
-                                .setMessage(getString(R.string.delete_shift_query) + " " + simpleDateFormat.format(new Date(currentShifts.get(position).startTime)) + " ?")
+                                .setMessage(getString(R.string.delete_shift_query) + " " + simpleDateFormat.format(new Date(currentShifts.get(position).getStartTime())) + " ?")
                                 .setCancelable(true)
                                 .setPositiveButton(android.R.string.yes,
                                         new Dialog.OnClickListener() {
@@ -142,7 +146,7 @@ public class RecentShifts extends AppCompatActivity {
                                             public void onClick(DialogInterface dialogInterface, int k) {
                                                 removeShift(position);
                                                 notifyChanges();
-                                                Toast.makeText(getBaseContext(), "משמרת נמחקה בהצלחה!", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(getActivity().getApplicationContext(), "משמרת נמחקה בהצלחה!", Toast.LENGTH_LONG).show();
                                             }
                                         })
                                 .setNegativeButton(android.R.string.no,
@@ -159,7 +163,9 @@ public class RecentShifts extends AppCompatActivity {
                 return true;
             }
         });
+        return view;
     }
+
     void writingToDb(ArrayList<Shift> shifts) {
         try {
             dbAdapter.open();
@@ -210,7 +216,7 @@ public class RecentShifts extends AppCompatActivity {
         Shift shift;
         for (int i = 0; i < allShifts.size(); i++) {
             shift = allShifts.get(i);
-            calendar.setTime(new Date(shift.startTime));
+            calendar.setTime(new Date(shift.getStartTime()));
             if (calendar.get(Calendar.MONTH) == selectedMonth && calendar.get(Calendar.YEAR) == selectedYear) {
                 currentShifts.add(shift);
                 totalTips += shift.getTipsCount();
@@ -237,27 +243,5 @@ public class RecentShifts extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_recent_shifts, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

@@ -1,4 +1,4 @@
-package co.il.tipper.mysc.tipper;
+package co.il.tipper.mysc.tipper.fragments;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import co.il.tipper.mysc.tipper.R;
 
 /**
  * Created by Mysc on 2.1.2016.
@@ -17,11 +19,11 @@ public class ShiftOptionFragment extends DialogFragment {
     Button btnEdit;
     Button btnDelete;
 
-    void setFragment(OnSelectShiftOptionListener listener){
+    public void setFragment(OnSelectShiftOptionListener listener){
         this.listener = listener;
     }
 
-    interface OnSelectShiftOptionListener{
+    public interface OnSelectShiftOptionListener{
         void editShift();
         void deleteShift();
     }

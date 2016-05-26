@@ -1,4 +1,4 @@
-package co.il.tipper.mysc.tipper;
+package co.il.tipper.mysc.tipper.fragments;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
@@ -10,6 +10,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import co.il.tipper.mysc.tipper.R;
+import co.il.tipper.mysc.tipper.SettingsFragment;
 
 /**
  * Created by Mysc on 27.12.2015.
@@ -25,7 +28,7 @@ public class SetSalaryFragment extends DialogFragment {
         this.listener = listener;
     }
 
-    interface OnSetSalaryListener{
+    public interface OnSetSalaryListener{
         void onFinish(float salaryPerHour);
     }
 
@@ -53,7 +56,7 @@ public class SetSalaryFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 String salary = txtSalaryPerHour.getText().toString();
-                if(!SettingsActivity.checkNumberString(salary)){
+                if(!SettingsFragment.checkNumberString(salary)){
                     Toast.makeText(getActivity(), getString(R.string.vaild_input_number_notice), Toast.LENGTH_SHORT).show();
                     return;
                 }

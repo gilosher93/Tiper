@@ -6,7 +6,6 @@ import android.app.TimePickerDialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -40,18 +39,25 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import co.il.tipper.mysc.tipper.adapters.DBAdapter;
+import co.il.tipper.mysc.tipper.fragments.CreateManualShift;
+import co.il.tipper.mysc.tipper.fragments.RecentShiftsFragment;
+import co.il.tipper.mysc.tipper.fragments.SetSalaryFragment;
+import co.il.tipper.mysc.tipper.objects.Shift;
+
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String SOUNDS = "SOUNDS";
     public static final String prefName = "prefName";
     public static final String START_TIME = "start_time";
-    public static final String ALL_SHIFTS = "all_shifts";
     public static final String IS_START_WORKING = "is_start_working";
     public static final String DAILY_TIPS = "DAILY_TIPS";
-    public static final int REQUEST_CODE = 5;
     public static final String SALARY = "SALARY";
     public static final String FIRST_TIME = "FIRST_TIME";
     public static final String READ_HOME_SHOW_CASE = "readHomeShowCase";
+    public static final String SETTINGS_FRAGMENT = "settings_fragment";
+    public static final String CREATE_MANUAL_SHIFT = "create_manual_shift";
+    public static final String RECENT_FRAGMENT = "recent_fragment";
     LinearLayout layoutSummaryAndSalary;
     LinearLayout layoutAverageSalaryPerHour;
     ShowcaseView showcase;
@@ -480,15 +486,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(getBaseContext(),getString(R.string.shift_saved_successfully), Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_home, menu);
@@ -497,19 +494,33 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int count = getFragmentManager().getBackStackEntryCount();
         switch (item.getItemId()) {
             case R.id.action_settings:
-                Intent settingsActivity = new Intent(this, SettingsActivity.class);
-                startActivity(settingsActivity);
+                if (count == 0){
+                    SettingsFragment settingsFragment = new SettingsFragment();
+                    getFragmentManager().beginTransaction().add(R.id.main_container, settingsFragment).addToBackStack(SETTINGS_FRAGMENT).commit();
+                }
                 break;
             case R.id.action_table:
-                Intent recentShifts = new Intent(this, RecentShifts.class);
-                recentShifts.putExtra(ALL_SHIFTS, allShifts);
-                startActivity(recentShifts);
+                if (count == 0){
+                    RecentShiftsFragment recentShiftsFragment = new RecentShiftsFragment();
+                    recentShiftsFragment.setFragment(allShifts);
+                    getFragmentManager().beginTransaction().add(R.id.main_container, recentShiftsFragment).addToBackStack(RECENT_FRAGMENT).commit();
+                }
                 break;
             case R.id.action_add_manual_shift:
-                Intent createManualShift = new Intent(this, CreateManualShift.class);
-                startActivityForResult(createManualShift, REQUEST_CODE);
+                CreateManualShift createManualShift = new CreateManualShift();
+                createManualShift.setFragment(new CreateManualShift.CreateManualShiftListener() {
+                    @Override
+                    public void addShift(Shift shift) {
+                        writingToDb(shift);
+                        Toast.makeText(getBaseContext(), getString(R.string.shift_saved_successfully), Toast.LENGTH_LONG).show();
+                    }
+                });
+                if (count == 0) {
+                    getFragmentManager().beginTransaction().add(R.id.main_container, createManualShift).addToBackStack(CREATE_MANUAL_SHIFT).commit();
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -544,6 +555,15 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        int count = getFragmentManager().getBackStackEntryCount();
+        if (count > 0){
+            getFragmentManager().popBackStack();
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public void onClick(View v) {

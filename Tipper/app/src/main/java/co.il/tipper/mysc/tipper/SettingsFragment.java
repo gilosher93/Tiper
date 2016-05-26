@@ -1,22 +1,21 @@
 package co.il.tipper.mysc.tipper;
 
+import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsFragment extends Fragment {
 
     SharedPreferences sharedPreferences;
     EditText txtSalaryPerHour;
@@ -25,36 +24,35 @@ public class SettingsActivity extends AppCompatActivity {
     float salaryPerHours;
     boolean sounds = false;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
-
-        switchSounds = (Switch) findViewById(R.id.switchSound);
-        txtSalaryPerHour = (EditText) findViewById(R.id.txtSalaryPerHour);
-        sharedPreferences = getSharedPreferences(HomeActivity.prefName,MODE_PRIVATE);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        switchSounds = (Switch) view.findViewById(R.id.switchSound);
+        txtSalaryPerHour = (EditText) view.findViewById(R.id.txtSalaryPerHour);
+        sharedPreferences = getActivity().getSharedPreferences(HomeActivity.prefName, Context.MODE_PRIVATE);
 
         readSharePreferences();
         NumberFormat formatter = new DecimalFormat("#.#");
         txtSalaryPerHour.setText(formatter.format(salaryPerHours));
         switchSounds.setChecked(sounds);
 
-        btnSaveSettings = (Button) findViewById(R.id.btnSaveSettings);
+        btnSaveSettings = (Button) view.findViewById(R.id.btnSaveSettings);
         btnSaveSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String salary = txtSalaryPerHour.getText().toString();
                 if(!checkNumberString(salary)){
-                    Toast.makeText(getBaseContext(), getString(R.string.vaild_input_number_notice), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.vaild_input_number_notice), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 salaryPerHours = salary.length() == 0 ? 0 : Float.valueOf(salary);
                 sounds = switchSounds.isChecked();
                 writeToSharedPreferences();
-                finish();
+                getFragmentManager().popBackStack();
             }
         });
-
+        return view;
     }
 
     private void readSharePreferences() {
@@ -67,30 +65,6 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putFloat(HomeActivity.SALARY, salaryPerHours);
         editor.putBoolean(HomeActivity.SOUNDS,sounds);
         editor.apply();
-    }
-
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public static boolean checkNumberString (String str){
